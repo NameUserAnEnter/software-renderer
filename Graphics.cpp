@@ -45,9 +45,9 @@ void Graphics::ReleaseBuffers() {
 	DeleteDC(backbuffer_dc);
 }
 
-int Graphics::SetOnBackBuffer(int x, int y, int width, int height, ColorBlockTransparent* bytes) {
+void Graphics::DrawRectangle(int x, int y, int width, int height, ColorBlockTransparent* bytes) {
 	if (bytes == nullptr) {
-		return -1;
+		return;
 	}
 
 	for (int i = y; i < y + height; i++)
@@ -70,23 +70,33 @@ int Graphics::SetOnBackBuffer(int x, int y, int width, int height, ColorBlockTra
 		}
 	}
 
-	return SetDIBits(NULL, backbuffer_bitmap, 0, uBufferHeight, backbuffer_bytes, (BITMAPINFO*)&backbuffer_bitmapinfo, DIB_RGB_COLORS);
+	SetDIBits(NULL, backbuffer_bitmap, 0, uBufferHeight, backbuffer_bytes, (BITMAPINFO*)&backbuffer_bitmapinfo, DIB_RGB_COLORS);
 }
 
-int Graphics::SetOnBackBuffer(int x, int y, ColorBlockTransparent color) {
-	//ColorBlockTransparent* bytes = (ColorBlockTransparent*) calloc(1, sizeof(ColorBlockTransparent));
-	//if (bytes == nullptr) {
-	//	return -1;
-	//}
-
-	//bytes[0] = color;
-	//int return_value = SetOnBackBuffer(x, y, 1, 1, bytes);
-
-	//free(bytes);
-	//return return_value;
-
+void Graphics::DrawPixel(int x, int y, ColorBlockTransparent color) {
 	SetPixel(backbuffer_dc, x, y, RGB(color.R, color.G, color.B));
-	return 0;
+}
+
+void Graphics::DrawLine(int x1, int y1, int x2, int y2, ColorBlockTransparent color) {
+	if (x1 == x2) {
+		for (int i = 0; i < abs(y1 - y2); i++) {
+			DrawPixel(x1, min(y1, y2) + i, color);
+		}
+		return;
+	}
+
+	double slope = (y2 - y1) / (double)(x2 - x1);
+	for (int i = 0; i < abs(x2 - x1); i++) {
+		if (x1 < x2) {
+			DrawPixel(x1 + i, y1 + i * slope, color);
+		}
+		else {
+			DrawPixel(x2 + i, y2 + i * slope, color);
+		}
+	}
+
+	// y     = slope * x | / x
+	// y / x = slope
 }
 
 void Graphics::ClearBackBuffer() {

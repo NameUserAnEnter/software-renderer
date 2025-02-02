@@ -31,8 +31,10 @@ public:
 	void InitializeBuffers();
 	void ReleaseBuffers();
 
-	int SetOnBackBuffer(int x, int y, int width, int height, ColorBlockTransparent* bytes);
-	int SetOnBackBuffer(int x, int y, ColorBlockTransparent color);
+	// Rasterizer operations drawing on the backbuffer
+	void DrawRectangle(int x, int y, int width, int height, ColorBlockTransparent* bytes);
+	void DrawPixel(int x, int y, ColorBlockTransparent color);
+	void DrawLine(int x1, int y1, int x2, int y2, ColorBlockTransparent);
 
 	void ClearBackBuffer();
 	void UpdateFrontBuffer();

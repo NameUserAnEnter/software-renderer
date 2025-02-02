@@ -29,7 +29,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	wcex.hInstance = hInstance;
 	wcex.lpszClassName = szWindowClass;
-	wcex.hbrBackground = CreateSolidBrush(RGB(30, 30, 30));
+	wcex.hbrBackground = CreateSolidBrush(RGB(10, 0, 30));
 
 	RegisterClassEx(&wcex);
 	hWnd = CreateWindow(szWindowClass, L"Main", WS_OVERLAPPEDWINDOW, 0, 0, uWindowWidth, uWindowHeight, NULL, NULL, hInstance, NULL);
@@ -50,36 +50,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	graphics.ResizeBuffers(ClientRect.right, ClientRect.bottom);		// also calls InitializeBuffers()
 
 	// Temporary test shape initialization for test rendering
-	unsigned int x = 20, y = 20, width = 50, height = 50;
-	unsigned int lineThicknes = 5;
-	ColorBlockTransparent color = { 70, 0, 255, 255 };
-
-	//Shape shape;
-	//shape.x = x;
-	//shape.y = x;
-	//shape.Resize(width, height);
-	//shape.FillWithColor(color);
-
-	unsigned int it = 0;
+	unsigned int x = 20, y = 20, width = 100, height = 50;
+	ColorBlockTransparent color = { 170, 0, 255, 255 };
 
 	bool bDone = false;
 	while (!bDone) {
+		// Clear backbuffer
 		graphics.ClearBackBuffer();
 
-		it++;
+		// Render geometry
+		// ...
 
-		// Rendering
-		// Test rendering
-		//graphics.SetOnBackBuffer(shape.x, shape.y, shape.GetWidth(), shape.GetHeight(), shape.GetBytes());
-		
-		for (int i = 0; i < height; i++) {
-			for (int j = 0; j < width; j++) {
-				if (i < lineThicknes || j < lineThicknes || i >= height - lineThicknes || j >= width - lineThicknes) {
-					graphics.SetOnBackBuffer(x + j, y + i, color);
-				}
-			}
-		}
-
+		// Swap buffers
 		graphics.UpdateFrontBuffer();
 
 		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) != 0) {
@@ -97,7 +79,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 	}
 
-	//shape.ReleaseShape();
 	graphics.ReleaseBuffers();
 	return 0;
 }
