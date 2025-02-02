@@ -51,6 +51,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	// Temporary test shape initialization for test rendering
 	unsigned int x = 20, y = 20, width = 50, height = 50;
+	unsigned int lineThicknes = 5;
 	ColorBlockTransparent color = { 70, 0, 255, 255 };
 
 	//Shape shape;
@@ -73,7 +74,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		
 		for (int i = 0; i < height; i++) {
 			for (int j = 0; j < width; j++) {
-				graphics.SetOnBackBuffer(x + j, y + i, color);
+				if (i < lineThicknes || j < lineThicknes || i >= height - lineThicknes || j >= width - lineThicknes) {
+					graphics.SetOnBackBuffer(x + j, y + i, color);
+				}
 			}
 		}
 

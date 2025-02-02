@@ -74,16 +74,19 @@ int Graphics::SetOnBackBuffer(int x, int y, int width, int height, ColorBlockTra
 }
 
 int Graphics::SetOnBackBuffer(int x, int y, ColorBlockTransparent color) {
-	ColorBlockTransparent* bytes = (ColorBlockTransparent*) calloc(1, sizeof(ColorBlockTransparent));
-	if (bytes == nullptr) {
-		return -1;
-	}
+	//ColorBlockTransparent* bytes = (ColorBlockTransparent*) calloc(1, sizeof(ColorBlockTransparent));
+	//if (bytes == nullptr) {
+	//	return -1;
+	//}
 
-	bytes[0] = color;
-	int return_value = SetOnBackBuffer(x, y, 1, 1, bytes);
+	//bytes[0] = color;
+	//int return_value = SetOnBackBuffer(x, y, 1, 1, bytes);
 
-	free(bytes);
-	return return_value;
+	//free(bytes);
+	//return return_value;
+
+	SetPixel(backbuffer_dc, x, y, RGB(color.R, color.G, color.B));
+	return 0;
 }
 
 void Graphics::ClearBackBuffer() {
