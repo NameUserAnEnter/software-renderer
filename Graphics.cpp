@@ -1,0 +1,114 @@
+#include "graphics.h"
+
+Graphics::Graphics(HWND hWindow) {
+	this->hWindow = hWindow;
+
+	bytes_per_pixel = 4;
+	backbuffer_bytes = nullptr;
+}
+
+void Graphics::InitializeBuffers() {
+	frontbuffer_dc = GetDC(hWindow);
+
+	backbuffer_dc = CreateCompatibleDC(frontbuffer_dc);
+	backbuffer_bitmap = CreateCompatibleBitmap(frontbuffer_dc, uBufferWidth, uBufferHeight);
+
+	SelectObject(backbuffer_dc, backbuffer_bitmap);
+
+	cleanbuffer_bitmap = CreateCompatibleBitmap(frontbuffer_dc, uBufferWidth, uBufferHeight);
+
+	update_buffer(backbuffer_dc, frontbuffer_dc);
+
+	backbuffer_bytes = nullptr;
+
+	backbuffer_bitmapinfo.biSize			= sizeof(BITMAPINFOHEADER);
+	backbuffer_bitmapinfo.biWidth			= uBufferWidth;
+	backbuffer_bitmapinfo.biHeight			= uBufferHeight * (-1);
+	backbuffer_bitmapinfo.biPlanes			= 1;
+	backbuffer_bitmapinfo.biBitCount		= 8 * bytes_per_pixel;
+	backbuffer_bitmapinfo.biCompression		= BI_RGB;
+
+	backbuffer_memory_block_size = (size_t)uBufferWidth * bytes_per_pixel * (size_t)uBufferHeight;
+	backbuffer_bytes = (unsigned char*) calloc(backbuffer_memory_block_size, sizeof(unsigned char));
+
+	GetDIBits(frontbuffer_dc, backbuffer_bitmap, 0, uBufferHeight, backbuffer_bytes, (BITMAPINFO*)&backbuffer_bitmapinfo, DIB_RGB_COLORS);
+	SetDIBits(NULL, cleanbuffer_bitmap, 0, uBufferHeight, backbuffer_bytes, (BITMAPINFO*)&backbuffer_bitmapinfo, DIB_RGB_COLORS);
+}
+
+void Graphics::ReleaseBuffers() {
+	if (backbuffer_bytes != nullptr) {
+		free(backbuffer_bytes);
+	}
+
+	DeleteObject(cleanbuffer_bitmap);
+	DeleteObject(backbuffer_bitmap);
+	DeleteDC(backbuffer_dc);
+}
+
+int Graphics::SetOnBackBuffer(int x, int y, int width, int height, ColorBlockTransparent* bytes) {
+	if (bytes == nullptr) {
+		return -1;
+	}
+
+	for (int i = y; i < y + height; i++)
+	{
+		for (int j = x; j < x + width; j++)
+		{
+			if (within_window(j, i))
+			{
+				if ((j - x) >= 0 && (j - x) < width		&&		(i - y) >= 0 && (i - y) < height)
+				{
+					if (bytes[(i - y) * width + (j - x)].A != 0)
+					{
+						backbuffer_bytes[i * (uBufferWidth * bytes_per_pixel) + (j * bytes_per_pixel) + 0] = bytes[(i - y) * width + (j - x)].B;
+						backbuffer_bytes[i * (uBufferWidth * bytes_per_pixel) + (j * bytes_per_pixel) + 1] = bytes[(i - y) * width + (j - x)].G;
+						backbuffer_bytes[i * (uBufferWidth * bytes_per_pixel) + (j * bytes_per_pixel) + 2] = bytes[(i - y) * width + (j - x)].R;
+					}
+				}
+				else break;
+			}
+		}
+	}
+
+	return SetDIBits(NULL, backbuffer_bitmap, 0, uBufferHeight, backbuffer_bytes, (BITMAPINFO*)&backbuffer_bitmapinfo, DIB_RGB_COLORS);
+}
+
+int Graphics::SetOnBackBuffer(int x, int y, ColorBlockTransparent color) {
+	ColorBlockTransparent* bytes = (ColorBlockTransparent*) calloc(1, sizeof(ColorBlockTransparent));
+	if (bytes == nullptr) {
+		return -1;
+	}
+
+	bytes[0] = color;
+	int return_value = SetOnBackBuffer(x, y, 1, 1, bytes);
+
+	free(bytes);
+	return return_value;
+}
+
+void Graphics::ClearBackBuffer() {
+	GetDIBits(frontbuffer_dc, cleanbuffer_bitmap, 0, uBufferHeight, backbuffer_bytes, (BITMAPINFO*)&backbuffer_bitmapinfo, DIB_RGB_COLORS);
+	SetDIBits(NULL, backbuffer_bitmap, 0, uBufferHeight, backbuffer_bytes, (BITMAPINFO*)&backbuffer_bitmapinfo, DIB_RGB_COLORS);
+}
+
+void Graphics::UpdateFrontBuffer() {
+	update_buffer(frontbuffer_dc, backbuffer_dc);
+}
+
+void Graphics::ResizeBuffers(int width, int height) {
+	uBufferWidth = width;
+	uBufferHeight = height;
+
+	ReleaseBuffers();
+	InitializeBuffers();
+}
+
+void Graphics::update_buffer(HDC destination, HDC source) {
+	BitBlt(destination, 0, 0, uBufferWidth, uBufferHeight, source, 0, 0, SRCCOPY);
+}
+
+bool Graphics::within_window(int x, int y) {
+	if (x >= 0 && x < uBufferWidth && y >= 0 && y < uBufferHeight) return true;
+	else return false;
+}
+
