@@ -1,15 +1,22 @@
 #ifndef GEOMETRY_H
 #define GEOMETRY_H
 
-#include "Point.h"
+#define PI 3.14159
+
+#include "Float.h"
+#include "utils.h"
 #include <Windows.h>
+#include <math.h>
 
 struct Geometry {
-	static point2 ToScreen(point3);
-	static point3 ToWorld(point2);
+	static float2 ToScreen(float3);
+	static float3 ToWorld(float2);
 
-	static point3 Translate(point3, point3);
-	static point3 Scale(point3, float);
+	static float3 Translate(float3, float3);
+	static float3 Scale(float3, float);
+	static float3 RotateAroundAxisX(float3, float);
+	static float3 RotateAroundAxisY(float3, float);
+	static float3 RotateAroundAxisZ(float3, float);
 
 	static float FOV;
 

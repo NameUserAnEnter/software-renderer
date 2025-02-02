@@ -1,22 +1,23 @@
 #ifndef MESH_H
 #define MESH_H
 
-#include "Point.h"
+#include "Float.h"
 #include <vector>
 
 class Mesh {
 public:
 	Mesh();
 
-	void AddVertex(point3);
+	void AddVertex(float3);
 	void AddVertex(float x, float y, float z);
 	
 	void ReleaseMesh();
 public:
-	std::vector<point3> vertices;
+	std::vector<float3> vertices;
 
-	point3 pos;
+	float3 pos;
 	float scale;
+	float3 angle;
 };
 
 #endif

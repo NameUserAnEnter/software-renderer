@@ -2,10 +2,13 @@
 
 Mesh::Mesh() {
 	pos = { 0.0, 0.0, 0.0 };
+	scale = 1.0;
+	angle = { 0.0, 0.0, 0.0 };
+
 	vertices.clear();
 }
 
-void Mesh::AddVertex(point3 vertex) {
+void Mesh::AddVertex(float3 vertex) {
 	vertices.push_back(vertex);
 }
 

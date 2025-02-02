@@ -87,15 +87,15 @@ void Engine::InitCustomScene() {
 	//    121                                221
 	//
 
-	point3 v111 = { -1,  1, 1 };
-	point3 v211 = { 1,  1, 1 };
-	point3 v121 = { -1, -1, 1 };
-	point3 v221 = { 1, -1, 1 };
+	float3 v111 = { -1,  1, 1 };
+	float3 v211 = { 1,  1, 1 };
+	float3 v121 = { -1, -1, 1 };
+	float3 v221 = { 1, -1, 1 };
 
-	point3 v112 = { -1,  1, -1 };
-	point3 v212 = { 1,  1, -1 };
-	point3 v122 = { -1, -1, -1 };
-	point3 v222 = { 1, -1, -1 };
+	float3 v112 = { -1,  1, -1 };
+	float3 v212 = { 1,  1, -1 };
+	float3 v122 = { -1, -1, -1 };
+	float3 v222 = { 1, -1, -1 };
 
 	// Front face
 	cube.AddVertex(v111);
@@ -165,6 +165,7 @@ void Engine::InitCustomScene() {
 
 	cube.scale = 1;
 	cube.pos = { 0.0, 0.0, 0.0 };
+	cube.angle = { 0.0, 0, 0.0 };
 
 	scene.Begin();
 	scene.AddMesh(cube);
@@ -176,11 +177,21 @@ void Engine::MoveObjects() {
 void Engine::ReadInputs() {
 	Mesh* controlled = &scene.meshList.back();
 	static float delta = 0.01;
+	static float delta_angle = (PI / 4) * 0.02;
 
 	if (Input::Esc) breakOut = true;
 
-	if (Input::Alpha[W]) controlled->pos.z += delta;
-	if (Input::Alpha[S]) controlled->pos.z -= delta;
+	//if (Input::Alpha[W]) controlled->pos.z += delta;
+	//if (Input::Alpha[S]) controlled->pos.z -= delta;
+
+	if (Input::Alpha[Q]) controlled->angle.y -= delta_angle;
+	if (Input::Alpha[E]) controlled->angle.y += delta_angle;
+
+	if (Input::Alpha[W]) controlled->angle.x -= delta_angle;
+	if (Input::Alpha[S]) controlled->angle.x += delta_angle;
+
+	if (Input::Alpha[A]) controlled->angle.z -= delta_angle;
+	if (Input::Alpha[D]) controlled->angle.z += delta_angle;
 }
 
 void Engine::RenderScene() {
@@ -188,8 +199,17 @@ void Engine::RenderScene() {
 		for (int i = 1; i < mesh.vertices.size(); i++) {
 			if (i % 4 == 0) continue;
 
-			point3 v1 = mesh.vertices[i - 1];
-			point3 v2 = mesh.vertices[i];
+			float3 v1 = mesh.vertices[i - 1];
+			float3 v2 = mesh.vertices[i];
+
+			v1 = Geometry::RotateAroundAxisX(v1, mesh.angle.x);
+			v2 = Geometry::RotateAroundAxisX(v2, mesh.angle.x);
+
+			v1 = Geometry::RotateAroundAxisY(v1, mesh.angle.y);
+			v2 = Geometry::RotateAroundAxisY(v2, mesh.angle.y);
+
+			v1 = Geometry::RotateAroundAxisZ(v1, mesh.angle.z);
+			v2 = Geometry::RotateAroundAxisZ(v2, mesh.angle.z);
 
 			v1 = Geometry::Scale(v1, mesh.scale);
 			v2 = Geometry::Scale(v2, mesh.scale);
@@ -197,8 +217,8 @@ void Engine::RenderScene() {
 			v1 = Geometry::Translate(v1, mesh.pos);
 			v2 = Geometry::Translate(v2, mesh.pos);
 
-			point2 p1 = Geometry::ToScreen(v1);
-			point2 p2 = Geometry::ToScreen(v2);
+			float2 p1 = Geometry::ToScreen(v1);
+			float2 p2 = Geometry::ToScreen(v2);
 
 			graphics.DrawLine(p1.x, p1.y, p2.x, p2.y, wireframeColor);
 		}
