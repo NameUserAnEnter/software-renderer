@@ -11,8 +11,9 @@ point2 Geometry::ToScreen(point3 world) {
 
 	world.x *= (uViewportHeight / (float) uViewportWidth);
 
-	screen.x = (world.x * (world.z + FOV)) * (uViewportWidth / 2.f) + uViewportWidth / 2.f;
-	screen.y = (world.y * (world.z + FOV)) * (uViewportHeight / 2.f * -1) + uViewportHeight /2.f;
+	static const float c = 0.05;
+	screen.x = (world.x * (world.z * c + FOV)) * (uViewportWidth / 2.f) + uViewportWidth / 2.f;
+	screen.y = (world.y * (world.z * c + FOV)) * (uViewportHeight / 2.f * -1) + uViewportHeight /2.f;
 
 
 	return screen;

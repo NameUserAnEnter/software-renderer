@@ -1,6 +1,6 @@
 #include "Engine.h"
 
-float Geometry::FOV = 0.6f;
+float Geometry::FOV = 0.6;
 unsigned int Geometry::uViewportWidth = 800;
 unsigned int Geometry::uViewportHeight = 600;
 
@@ -87,83 +87,83 @@ void Engine::InitCustomScene() {
 	//    121                                221
 	//
 
-	point3 v111 = { -1,  1, -1 };
-	point3 v211 = { 1,  1, -1 };
-	point3 v121 = { -1, -1, -1 };
-	point3 v221 = { 1, -1, -1 };
+	point3 v111 = { -1,  1, 1 };
+	point3 v211 = { 1,  1, 1 };
+	point3 v121 = { -1, -1, 1 };
+	point3 v221 = { 1, -1, 1 };
 
-	point3 v112 = { -1,  1, 1 };
-	point3 v212 = { 1,  1, 1 };
-	point3 v122 = { -1, -1, 1 };
-	point3 v222 = { 1, -1, 1 };
+	point3 v112 = { -1,  1, -1 };
+	point3 v212 = { 1,  1, -1 };
+	point3 v122 = { -1, -1, -1 };
+	point3 v222 = { 1, -1, -1 };
 
 	// Front face
 	cube.AddVertex(v111);
 	cube.AddVertex(v211);
 	cube.AddVertex(v221);
-	//cube.AddVertex(v111);
+	cube.AddVertex(v111);
 
 	cube.AddVertex(v111);
 	cube.AddVertex(v221);
 	cube.AddVertex(v121);
-	//cube.AddVertex(v111);
+	cube.AddVertex(v111);
 
 	// Left face
 	cube.AddVertex(v111);
 	cube.AddVertex(v121);
 	cube.AddVertex(v112);
-	//cube.AddVertex(v111);
-
 	cube.AddVertex(v111);
+
 	cube.AddVertex(v122);
+	cube.AddVertex(v121);
 	cube.AddVertex(v112);
-	//cube.AddVertex(v111);
+	cube.AddVertex(v122);
 
 	// Back face
 	cube.AddVertex(v112);
+	cube.AddVertex(v212);
+	cube.AddVertex(v122);
+	cube.AddVertex(v112);
+
+	cube.AddVertex(v222);
 	cube.AddVertex(v122);
 	cube.AddVertex(v212);
-	//cube.AddVertex(v112);
-
-	cube.AddVertex(v112);
 	cube.AddVertex(v222);
-	cube.AddVertex(v212);
-	//cube.AddVertex(v112);
 
 	// Right face
 	cube.AddVertex(v212);
 	cube.AddVertex(v222);
 	cube.AddVertex(v211);
-	//cube.AddVertex(v212);
+	cube.AddVertex(v212);
 
 	cube.AddVertex(v211);
 	cube.AddVertex(v222);
 	cube.AddVertex(v221);
-	//cube.AddVertex(v211);
+	cube.AddVertex(v211);
 
 	// Top face
-	cube.AddVertex(v211);
-	cube.AddVertex(v111);
-	cube.AddVertex(v212);
-	//cube.AddVertex(v211);
-
-	cube.AddVertex(v211);
 	cube.AddVertex(v111);
 	cube.AddVertex(v112);
-	//cube.AddVertex(v211);
+	cube.AddVertex(v211);
+	cube.AddVertex(v111);
+
+	cube.AddVertex(v112);
+	cube.AddVertex(v212);
+	cube.AddVertex(v211);
+	cube.AddVertex(v112);
 
 	// Bottom face
-	cube.AddVertex(v221);
-	cube.AddVertex(v122);
 	cube.AddVertex(v121);
-	//cube.AddVertex(v221);
-
-	cube.AddVertex(v221);
 	cube.AddVertex(v122);
 	cube.AddVertex(v222);
-	//cube.AddVertex(v221);
+	cube.AddVertex(v121);
 
-	cube.scale = 0.5;
+	cube.AddVertex(v222);
+	cube.AddVertex(v221);
+	cube.AddVertex(v121);
+	cube.AddVertex(v222);
+
+	cube.scale = 1;
 	cube.pos = { 0.0, 0.0, 0.0 };
 
 	scene.Begin();
@@ -185,9 +185,9 @@ void Engine::ReadInputs() {
 
 void Engine::RenderScene() {
 	for (Mesh mesh : scene.meshList) {
-		std::string output = "";
-
 		for (int i = 1; i < mesh.vertices.size(); i++) {
+			if (i % 4 == 0) continue;
+
 			point3 v1 = mesh.vertices[i - 1];
 			point3 v2 = mesh.vertices[i];
 
@@ -201,14 +201,9 @@ void Engine::RenderScene() {
 			point2 p2 = Geometry::ToScreen(v2);
 
 			graphics.DrawLine(p1.x, p1.y, p2.x, p2.y, wireframeColor);
-
-			if (i == 1 || i == 3) {
-				output += std::to_string(v1.x) + ", " + std::to_string(v1.y) + " -> ";
-				output += std::to_string(p1.x) + ", " + std::to_string(p1.y) + " || ";
-			}
 		}
 
-		SetWindowTitle(hWindow, output);
+		SetWindowTitle(hWindow, "scale: " + std::to_string(mesh.scale) + ", pos.z: " + std::to_string(mesh.pos.z) + ", FOV: " + std::to_string(Geometry::FOV));
 	}
 }
 
