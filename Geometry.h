@@ -3,14 +3,14 @@
 
 #include "Point.h"
 
-class Geometry {
-public:
-	Geometry();
-
-	point2 ToScreen(point3);
-	point3 ToWorld(point2);
+struct Geometry {
+	static point2 ToScreen(point3);
+	static point3 ToWorld(point2);
 
 	static float FOV;
+
+	static unsigned int uViewportWidth;
+	static unsigned int uViewportHeight;
 };
 
 #endif
