@@ -103,14 +103,14 @@ void Input::SetInputs(bool state, unsigned long long data1, long long data2)
 
 void Input::SetScroll(unsigned long long data1, long long data2)
 {
-	short delta = HIWORD(data1);
+	short delta = (short) HIWORD(data1);
 
-	if (delta > 0) Mouse[mouse_control::UP_SCROLL] = true;
-	if (delta < 0) Mouse[mouse_control::DOWN_SCROLL] = true;
+	if (delta > 0) Mouse[mouse_control::SCROLL_UP] = true;
+	if (delta < 0) Mouse[mouse_control::SCROLL_DOWN] = true;
 	if (delta == 0)
 	{
-		Mouse[mouse_control::UP_SCROLL] = false;
-		Mouse[mouse_control::DOWN_SCROLL] = false;
+		Mouse[mouse_control::SCROLL_UP] = false;
+		Mouse[mouse_control::SCROLL_DOWN] = false;
 	}
 }
 
@@ -136,7 +136,7 @@ void Input::ReleaseMouseControls()
 
 void Input::UpdateInputs()
 {
-	Mouse[UP_SCROLL] = false;
-	Mouse[DOWN_SCROLL] = false;
+	Mouse[SCROLL_UP] = false;
+	Mouse[SCROLL_DOWN] = false;
 }
 

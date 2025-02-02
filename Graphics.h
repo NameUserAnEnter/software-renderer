@@ -34,7 +34,10 @@ public:
 	// Rasterizer operations drawing on the backbuffer
 	void DrawBitmap(int x, int y, int width, int height, ColorBlockTransparent* bytes);
 	void DrawPixel(int x, int y, ColorBlockTransparent color);
-	void DrawLine(int x1, int y1, int x2, int y2, ColorBlockTransparent);
+	void DrawLine(int x1, int y1, int x2, int y2, ColorBlockTransparent color);
+	void DrawRectangle(int x1, int y1, int x2, int y2, ColorBlockTransparent color);
+	void DrawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, ColorBlockTransparent color);
+	void DrawQuad(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, ColorBlockTransparent color);
 
 	void ClearBackBuffer();
 	void UpdateFrontBuffer();

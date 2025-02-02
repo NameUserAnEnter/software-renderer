@@ -99,6 +99,24 @@ void Graphics::DrawLine(int x1, int y1, int x2, int y2, ColorBlockTransparent co
 	// y / x = slope
 }
 
+void Graphics::DrawRectangle(int x1, int y1, int x2, int y2, ColorBlockTransparent color) {
+	for (int i = 0; i < abs(y2 - y1); i++) {
+		for (int j = 0; j < abs(x2 - x1); j++) {
+			DrawPixel(min(x1, x2) + j, min(y1, y2) + i, color);
+		}
+	}
+}
+
+void Graphics::DrawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, ColorBlockTransparent color) {
+	DrawLine(x1, y1, x2, y2, color);
+	DrawLine(x2, y2, x3, y3, color);
+	DrawLine(x3, y3, x1, x2, color);
+}
+
+void Graphics::DrawQuad(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, ColorBlockTransparent color) {
+	//
+}
+
 void Graphics::ClearBackBuffer() {
 	GetDIBits(frontbuffer_dc, cleanbuffer_bitmap, 0, uBufferHeight, backbuffer_bytes, (BITMAPINFO*)&backbuffer_bitmapinfo, DIB_RGB_COLORS);
 	SetDIBits(NULL, backbuffer_bitmap, 0, uBufferHeight, backbuffer_bytes, (BITMAPINFO*)&backbuffer_bitmapinfo, DIB_RGB_COLORS);

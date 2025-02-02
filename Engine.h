@@ -14,7 +14,7 @@ public:
 	void Release();
 
 	bool Update();
-	void OnKeystateChange(bool, unsigned long long);
+
 	void OnWindowResize(unsigned int, unsigned int);
 private:
 	void InitCustomScene();

@@ -1,8 +1,8 @@
 #include "Engine.h"
 
 float Geometry::FOV = 0.6;
-unsigned int Geometry::uViewportWidth = 800;
-unsigned int Geometry::uViewportHeight = 600;
+unsigned int Geometry::uViewportWidth = 1280;
+unsigned int Geometry::uViewportHeight = 960;
 
 void Engine::Init(HWND hWindow) {
 	this->hWindow = hWindow;
@@ -45,10 +45,6 @@ bool Engine::Update() {
 	graphics.UpdateFrontBuffer();
 
 	return breakOut;
-}
-
-void Engine::OnKeystateChange(bool pressed, unsigned long long code) {
-	Input::SetInputs(pressed, code);
 }
 
 void Engine::OnWindowResize(unsigned int uNewClientWidth, unsigned int uNewClientHeight) {
@@ -163,7 +159,7 @@ void Engine::InitCustomScene() {
 	cube.AddVertex(v121);
 	cube.AddVertex(v222);
 
-	cube.scale = 1;
+	cube.scale = 0.6;
 	cube.pos = { 0.0, 0.0, 0.0 };
 	cube.angle = { 0.0, 0, 0.0 };
 
@@ -176,13 +172,12 @@ void Engine::MoveObjects() {
 
 void Engine::ReadInputs() {
 	Mesh* controlled = &scene.meshList.back();
-	static float delta = 0.01;
-	static float delta_angle = (PI / 4) * 0.02;
+	float delta = 0.01;
+	float delta_angle = (PI / 4) * 0.02;
 
 	if (Input::Esc) breakOut = true;
 
-	//if (Input::Alpha[W]) controlled->pos.z += delta;
-	//if (Input::Alpha[S]) controlled->pos.z -= delta;
+	if (Input::Shift) delta_angle = (PI / 4) * 0.05;
 
 	if (Input::Alpha[Q]) controlled->angle.y -= delta_angle;
 	if (Input::Alpha[E]) controlled->angle.y += delta_angle;
@@ -192,6 +187,14 @@ void Engine::ReadInputs() {
 
 	if (Input::Alpha[A]) controlled->angle.z -= delta_angle;
 	if (Input::Alpha[D]) controlled->angle.z += delta_angle;
+
+	if (Input::Mouse[mouse_control::SCROLL_UP])		controlled->pos.z += delta;
+	if (Input::Mouse[mouse_control::SCROLL_DOWN])	controlled->pos.z -= delta;
+
+	if (Input::Alpha[R]) {
+		controlled->pos = { 0, 0, 0 };
+		controlled->angle = { 0, 0, 0 };
+	}
 }
 
 void Engine::RenderScene() {
@@ -223,7 +226,10 @@ void Engine::RenderScene() {
 			graphics.DrawLine(p1.x, p1.y, p2.x, p2.y, wireframeColor);
 		}
 
-		SetWindowTitle(hWindow, "scale: " + std::to_string(mesh.scale) + ", pos.z: " + std::to_string(mesh.pos.z) + ", FOV: " + std::to_string(Geometry::FOV));
+		//SetWindowTitle(hWindow, "scale: " + std::to_string(mesh.scale) + ", pos.z: " + std::to_string(mesh.pos.z) + ", FOV: " + std::to_string(Geometry::FOV));
 	}
+
+	graphics.DrawRectangle(20, 20, 140, 70, { 0, 255, 255, 255 });
+	graphics.DrawTriangle(20, 120, 140, 200, 20, 100, { 0, 255, 255, 255 });
 }
 

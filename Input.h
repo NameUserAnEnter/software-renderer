@@ -17,7 +17,7 @@ enum alphabet
 
 enum mouse_control
 {
-	LMB, MMB, RMB, UP_SCROLL, DOWN_SCROLL, MOVE
+	LMB, MMB, RMB, SCROLL_UP, SCROLL_DOWN, MOVE
 };
 
 enum arrow

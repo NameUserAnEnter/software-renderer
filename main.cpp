@@ -1,16 +1,7 @@
 #include <windows.h>
 #include "Engine.h";
 
-LRESULT WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-	switch (uMsg) {
-		case WM_DESTROY:
-			PostQuitMessage(0);
-			break;
-		default:
-			return DefWindowProc(hWnd, uMsg, wParam, lParam);
-	}
-	return 0;
-}
+LRESULT WndProc(HWND, UINT, WPARAM, LPARAM);
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	HWND hWnd;
@@ -51,12 +42,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) != 0) {
 			switch (msg.message) {
-				case WM_KEYUP:
-					engine.OnKeystateChange(false, msg.wParam);
-					break;
-				case WM_KEYDOWN:
-					engine.OnKeystateChange(true, msg.wParam);
-					break;
 				case WM_SIZE:
 					engine.OnWindowResize(LOWORD(msg.lParam), HIWORD(msg.lParam));
 					break;
@@ -71,6 +56,27 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 
 	engine.Release();
+	return 0;
+}
+
+LRESULT WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+	switch (uMsg) {
+		case WM_MOUSEWHEEL:
+			Input::SetScroll(wParam, lParam);
+			SetWindowTitle(hWnd, std::to_string((short)HIWORD(wParam)));
+			break;
+		case WM_KEYUP:
+			Input::SetInputs(false, wParam);
+			break;
+		case WM_KEYDOWN:
+			Input::SetInputs(true, wParam);
+			break;
+		case WM_DESTROY:
+			PostQuitMessage(0);
+			break;
+		default:
+			return DefWindowProc(hWnd, uMsg, wParam, lParam);
+	}
 	return 0;
 }
 
