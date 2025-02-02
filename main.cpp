@@ -47,15 +47,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	bool bDone = false;
 	while (!bDone) {
-		engine.Update();
+		if (engine.Update()) bDone = true;
 
 		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) != 0) {
 			switch (msg.message) {
 				case WM_KEYUP:
-					engine.OnKeyRelease();
+					engine.OnKeystateChange(false, msg.wParam);
 					break;
 				case WM_KEYDOWN:
-					engine.OnKeyPress();
+					engine.OnKeystateChange(true, msg.wParam);
 					break;
 				case WM_SIZE:
 					engine.OnWindowResize(LOWORD(msg.lParam), HIWORD(msg.lParam));

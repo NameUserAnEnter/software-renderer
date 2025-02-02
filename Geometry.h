@@ -2,6 +2,7 @@
 #define GEOMETRY_H
 
 #include "Point.h"
+#include <Windows.h>
 
 struct Geometry {
 	static point2 ToScreen(point3);

@@ -16,7 +16,7 @@ inline void PopupMessage(float num) {
 	PopupMessage(std::to_string(num));
 }
 
-inline void SetTitle(HWND hWindow, std::string title) {
+inline void SetWindowTitle(HWND hWindow, std::string title) {
 	SetWindowTextA(hWindow, title.c_str());
 }
 

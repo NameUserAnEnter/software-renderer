@@ -14,6 +14,5 @@ void Mesh::AddVertex(float x, float y, float z) {
 }
 
 void Mesh::ReleaseMesh() {
-	vertices.clear();
 }
 

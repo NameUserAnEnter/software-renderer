@@ -20,6 +20,8 @@ void Engine::Init(HWND hWindow) {
 	graphics.ResizeBuffers(uClientWidth, uClientHeight);		// also calls InitializeBuffers()
 	wireframeColor = { 170, 0, 255, 255 };
 
+	breakOut = false;
+
 	InitCustomScene();
 }
 
@@ -28,7 +30,11 @@ void Engine::Release() {
 	graphics.ReleaseBuffers();
 }
 
-void Engine::Update() {
+bool Engine::Update() {
+	// Logic
+	MoveObjects();
+	ReadInputs();
+
 	// Clear backbuffer
 	graphics.ClearBackBuffer();
 
@@ -37,12 +43,12 @@ void Engine::Update() {
 
 	// Swap buffers
 	graphics.UpdateFrontBuffer();
+
+	return breakOut;
 }
 
-void Engine::OnKeyPress() {
-}
-
-void Engine::OnKeyRelease() {
+void Engine::OnKeystateChange(bool pressed, unsigned long long code) {
+	Input::SetInputs(pressed, code);
 }
 
 void Engine::OnWindowResize(unsigned int uNewClientWidth, unsigned int uNewClientHeight) {
@@ -164,6 +170,19 @@ void Engine::InitCustomScene() {
 	scene.AddMesh(cube);
 }
 
+void Engine::MoveObjects() {
+}
+
+void Engine::ReadInputs() {
+	Mesh* controlled = &scene.meshList.back();
+	static float delta = 0.01;
+
+	if (Input::Esc) breakOut = true;
+
+	if (Input::Alpha[W]) controlled->pos.z += delta;
+	if (Input::Alpha[S]) controlled->pos.z -= delta;
+}
+
 void Engine::RenderScene() {
 	for (Mesh mesh : scene.meshList) {
 		std::string output = "";
@@ -189,7 +208,7 @@ void Engine::RenderScene() {
 			}
 		}
 
-		SetTitle(hWindow, output);
+		SetWindowTitle(hWindow, output);
 	}
 }
 
