@@ -1,9 +1,5 @@
 #include "Scene.h"
 
-Scene::Scene() {
-	meshList.clear();
-}
-
 void Scene::Begin() {
 	meshList.clear();
 }

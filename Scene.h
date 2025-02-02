@@ -6,8 +6,6 @@
 
 class Scene {
 public:
-	Scene();
-
 	void Begin();
 	void End();
 

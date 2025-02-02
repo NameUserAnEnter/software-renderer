@@ -1,6 +1,6 @@
 #include "graphics.h"
 
-Graphics::Graphics(HWND hWindow) {
+void Graphics::Init(HWND hWindow) {
 	this->hWindow = hWindow;
 
 	bytes_per_pixel = 4;
@@ -45,7 +45,7 @@ void Graphics::ReleaseBuffers() {
 	DeleteDC(backbuffer_dc);
 }
 
-void Graphics::DrawRectangle(int x, int y, int width, int height, ColorBlockTransparent* bytes) {
+void Graphics::DrawBitmap(int x, int y, int width, int height, ColorBlockTransparent* bytes) {
 	if (bytes == nullptr) {
 		return;
 	}

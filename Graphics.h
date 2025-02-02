@@ -26,13 +26,13 @@ private:
 
 	unsigned int bytes_per_pixel;
 public:
-	Graphics(HWND hWindow);
+	void Init(HWND hWindow);
 
 	void InitializeBuffers();
 	void ReleaseBuffers();
 
 	// Rasterizer operations drawing on the backbuffer
-	void DrawRectangle(int x, int y, int width, int height, ColorBlockTransparent* bytes);
+	void DrawBitmap(int x, int y, int width, int height, ColorBlockTransparent* bytes);
 	void DrawPixel(int x, int y, ColorBlockTransparent color);
 	void DrawLine(int x1, int y1, int x2, int y2, ColorBlockTransparent);
 

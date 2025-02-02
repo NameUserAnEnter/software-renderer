@@ -1,13 +1,5 @@
 #include <windows.h>
-#include "Graphics.h"
-#include "Shape.h"
-#include "Scene.h"
-#include "Geometry.h"
-#include "utils.h"
-
-float Geometry::FOV = 0.6f;
-unsigned int Geometry::uViewportWidth = 800;
-unsigned int Geometry::uViewportHeight = 600;
+#include "Engine.h";
 
 LRESULT WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	switch (uMsg) {
@@ -48,76 +40,25 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	ShowWindow(hWnd, SW_SHOW);
 	UpdateWindow(hWnd);
 
-	RECT ClientRect;
-	GetClientRect(hWnd, &ClientRect);
-
-	unsigned int uClientWidth = ClientRect.right;
-	unsigned int uClientHeight = ClientRect.bottom;
-
-	Geometry::uViewportWidth = uClientWidth;
-	Geometry::uViewportHeight = uClientHeight;
-
 	MSG msg;
 
-	Graphics graphics(hWnd); //, uWindowWidth, uWindowHeight);
-	graphics.ResizeBuffers(uClientWidth, uClientHeight);		// also calls InitializeBuffers()
-	ColorBlockTransparent color = { 170, 0, 255, 255 };
-
-	Scene scene;
-	scene.Begin();
-
-	scene.AddMesh(Mesh());
-	scene.meshList.back().AddVertex(-1.0, -1.0, -1.0);
-	scene.meshList.back().AddVertex( 1.0, -1.0, -1.0);
-	scene.meshList.back().AddVertex( 1.0,  1.0, -1.0);
-	scene.meshList.back().AddVertex(-1.0,  1.0, -1.0);
-
-	scene.meshList.back().AddVertex(-1.0, -1.0, 1.0);
-	scene.meshList.back().AddVertex(1.0, -1.0, 1.0);
-	scene.meshList.back().AddVertex(1.0, 1.0, 1.0);
-	scene.meshList.back().AddVertex(-1.0, 1.0, 1.0);
-
-	scene.meshList.back().Scale(0.3);
+	Engine engine;
+	engine.Init(hWnd);
 
 	bool bDone = false;
 	while (!bDone) {
-		// Clear backbuffer
-		graphics.ClearBackBuffer();
-
-		// Render geometry
-		for (Mesh mesh : scene.meshList) {
-			std::string output = "";
-
-			for (int i = 1; i < mesh.vertices.size(); i++) {
-				point3 v1 = mesh.vertices[i - 1];
-				point3 v2 = mesh.vertices[i];
-
-				point2 p1 = Geometry::ToScreen(v1);
-				point2 p2 = Geometry::ToScreen(v2);
-
-				graphics.DrawLine(p1.x, p1.y, p2.x, p2.y, color);
-
-				if (i == 1 || i == 3) {
-					output += std::to_string(v1.x) + ", " + std::to_string(v1.y) + " -> ";
-					output += std::to_string(p1.x) + ", " + std::to_string(p1.y) + " || ";
-				}
-			}
-
-			SetTitle(hWnd, output);
-		}
-
-		// Swap buffers
-		graphics.UpdateFrontBuffer();
+		engine.Update();
 
 		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) != 0) {
 			switch (msg.message) {
+				case WM_KEYUP:
+					engine.OnKeyRelease();
+					break;
 				case WM_KEYDOWN:
+					engine.OnKeyPress();
 					break;
 				case WM_SIZE:
-					graphics.ResizeBuffers(LOWORD(msg.lParam), HIWORD(msg.lParam));
-
-					Geometry::uViewportWidth = LOWORD(msg.lParam);
-					Geometry::uViewportHeight = HIWORD(msg.lParam);
+					engine.OnWindowResize(LOWORD(msg.lParam), HIWORD(msg.lParam));
 					break;
 				case WM_QUIT:
 					bDone = true;
@@ -129,8 +70,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 	}
 
-	scene.End();
-	graphics.ReleaseBuffers();
+	engine.Release();
 	return 0;
 }
 

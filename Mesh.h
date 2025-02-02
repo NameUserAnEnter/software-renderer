@@ -10,12 +10,13 @@ public:
 
 	void AddVertex(point3);
 	void AddVertex(float x, float y, float z);
-
-	void Scale(float);
-
+	
 	void ReleaseMesh();
 public:
 	std::vector<point3> vertices;
+
+	point3 pos;
+	float scale;
 };
 
 #endif
