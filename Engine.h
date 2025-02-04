@@ -33,6 +33,9 @@ private:
 	ColorBlockTransparent wireframeColor;
 
 	std::string output;
+
+	float3 saved_pos;
+	float3 saved_angle;
 };
 
 #endif

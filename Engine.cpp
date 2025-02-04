@@ -162,7 +162,10 @@ void Engine::InitCustomScene() {
 
 	cube.scale = 0.6;
 	cube.pos = { 0, 0, 0 };
-	cube.angle = { 0, PI / 4, 0 };
+	cube.angle = { PI / 8, PI / 6, 0 };
+
+	saved_pos = cube.pos;
+	saved_angle = cube.angle;
 
 	scene.Begin();
 	scene.AddMesh(cube);
@@ -193,8 +196,8 @@ void Engine::ReadInputs() {
 	if (Input::Mouse[mouse_control::SCROLL_DOWN])	controlled->pos.z -= delta;
 
 	if (Input::Alpha[R]) {
-		controlled->pos = { 0, 0, 0 };
-		controlled->angle = { 0, 0, 0 };
+		controlled->pos = saved_pos;
+		controlled->angle = saved_angle;
 	}
 }
 
