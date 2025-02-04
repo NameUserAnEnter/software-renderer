@@ -1,7 +1,7 @@
 #include "Engine.h"
 
-float Geometry::FOV = 0.6;
-float Geometry::FOV2 = 0.05;
+float Geometry::z_offset = 1;
+float Geometry::FOV = 0.06;
 unsigned int Geometry::uViewportWidth = 1280;
 unsigned int Geometry::uViewportHeight = 960;
 
@@ -19,7 +19,7 @@ void Engine::Init(HWND hWindow) {
 
 	graphics.Init(hWindow);
 	graphics.ResizeBuffers(uClientWidth, uClientHeight);		// also calls InitializeBuffers()
-	wireframeColor = { 170, 0, 255, 255 };
+	wireframeColor = Color::white;
 
 	breakOut = false;
 
@@ -57,7 +57,24 @@ void Engine::OnWindowResize(unsigned int uNewClientWidth, unsigned int uNewClien
 }
 
 void Engine::InitCustomScene() {
+	InitObjects();
 
+	Mesh& cube = scene.meshList.back();
+
+	cube.scale = 1;
+	cube.pos = { 0, 0, 0 };
+	cube.angle = { 0, 0, 0 };
+
+	cube.scale = 0.6;
+	cube.pos = { 0, 0, 0 };
+	cube.angle = { PI / 8, 0, 0 };
+	//cube.angle = { PI / 8, PI / 6, 0 };
+
+	saved_pos = cube.pos;
+	saved_angle = cube.angle;
+}
+
+void Engine::InitObjects() {
 	Mesh cube;
 
 	//		     112__________________________________212
@@ -85,15 +102,15 @@ void Engine::InitCustomScene() {
 	//    121                                221
 	//
 
-	float3 v111 = { -1,  1, 1 };
-	float3 v211 = { 1,  1, 1 };
-	float3 v121 = { -1, -1, 1 };
-	float3 v221 = { 1, -1, 1 };
+	float3 v111 = { -1,  1, -1 };
+	float3 v211 = {  1,  1, -1 };
+	float3 v121 = { -1, -1, -1 };
+	float3 v221 = {  1, -1, -1 };
 
-	float3 v112 = { -1,  1, -1 };
-	float3 v212 = { 1,  1, -1 };
-	float3 v122 = { -1, -1, -1 };
-	float3 v222 = { 1, -1, -1 };
+	float3 v112 = { -1,  1, 1 };
+	float3 v212 = {  1,  1, 1 };
+	float3 v122 = { -1, -1, 1 };
+	float3 v222 = {  1, -1, 1 };
 
 	// Front face
 	cube.AddVertex(v111);
@@ -161,13 +178,6 @@ void Engine::InitCustomScene() {
 	cube.AddVertex(v121);
 	cube.AddVertex(v222);
 
-	cube.scale = 0.6;
-	cube.pos = { 0, 0, 0 };
-	cube.angle = { PI / 8, PI / 6, 0 };
-
-	saved_pos = cube.pos;
-	saved_angle = cube.angle;
-
 	scene.Begin();
 	scene.AddMesh(cube);
 }
@@ -176,34 +186,49 @@ void Engine::MoveObjects() {
 }
 
 void Engine::ReadInputs() {
-	Mesh* controlled = &scene.meshList.back();
-	float delta_pos = 1.0;
-	float delta_fov = 0.01;
-	float delta_angle = (PI / 4) * 0.02;
-
 	if (Input::Esc) breakOut = true;
 
-	if (Input::Shift) delta_angle = (PI / 4) * 0.05;
+	Mesh* controlled_mesh = &scene.meshList.back();
 
-	if (Input::Alpha[Q]) controlled->angle.y -= delta_angle;
-	if (Input::Alpha[E]) controlled->angle.y += delta_angle;
+	float delta_pos = 0.01;
+	float delta_scroll = 0.01;
+	float delta_angle = (PI / 4) * 0.01;
 
-	if (Input::Alpha[W]) controlled->angle.x -= delta_angle;
-	if (Input::Alpha[S]) controlled->angle.x += delta_angle;
+	if (Input::Shift) delta_angle *= 5;
 
-	if (Input::Alpha[A]) controlled->angle.z -= delta_angle;
-	if (Input::Alpha[D]) controlled->angle.z += delta_angle;
+	if (Input::Alpha[Q]) controlled_mesh->angle.y -= delta_angle;
+	if (Input::Alpha[E]) controlled_mesh->angle.y += delta_angle;
 
-	//if (Input::Mouse[mouse_control::SCROLL_UP])		controlled->pos.z += delta_pos;
-	//if (Input::Mouse[mouse_control::SCROLL_DOWN])	controlled->pos.z -= delta_pos;
+	if (Input::Alpha[W]) controlled_mesh->pos.z += delta_pos;
+	if (Input::Alpha[S]) controlled_mesh->pos.z -= delta_pos;
 
-	if (Input::Mouse[mouse_control::SCROLL_UP])		Geometry::FOV2 += delta_fov;
-	if (Input::Mouse[mouse_control::SCROLL_DOWN])	Geometry::FOV2 -= delta_fov;
+	if (Input::Alpha[A]) controlled_mesh->pos.x -= delta_pos;
+	if (Input::Alpha[D]) controlled_mesh->pos.x += delta_pos;
 
 	if (Input::Alpha[R]) {
-		controlled->pos = saved_pos;
-		controlled->angle = saved_angle;
+		controlled_mesh->pos = saved_pos;
+		controlled_mesh->angle = saved_angle;
 	}
+
+	// To do: implement sliders to change those values and/or buttons to change scroll mode
+	std::vector<float*> scrollable_values;
+	scrollable_values.push_back(&controlled_mesh->scale);
+	scrollable_values.push_back(&Geometry::z_offset);
+	scrollable_values.push_back(&Geometry::FOV);
+
+	static unsigned int scroll_mode = 0;
+
+	if (Input::Alpha[Z]) scroll_mode = 0;
+	if (Input::Alpha[X]) scroll_mode = 1;
+	if (Input::Alpha[C]) scroll_mode = 2;
+
+	output.clear();
+	output += "Scroll mode: " + NumStr(scroll_mode) + ", ";
+
+	if (Input::Shift) delta_scroll *= 10;
+
+	if (Input::Mouse[mouse_control::SCROLL_DOWN])	*scrollable_values[scroll_mode] -= delta_scroll;
+	if (Input::Mouse[mouse_control::SCROLL_UP])		*scrollable_values[scroll_mode] += delta_scroll;
 }
 
 void Engine::RenderScene() {
@@ -213,6 +238,15 @@ void Engine::RenderScene() {
 
 			float3 v1 = mesh.vertices[i - 1];
 			float3 v2 = mesh.vertices[i];
+
+			// To do:
+			// Fix transformation pipeline order
+			// Geometry struct needs new methods like PerspectiveTransformation and PerspectiveTransformationReverse, AspectTransformation, ..., and so on
+			// Then these methods should be called at the right moment in the pipeline, either by ToScreen or somewhere else
+			// 
+			// Otherwise the cube is going to be rendered malformed because of e.g. perspective variables being used in the wrong place
+			//
+			// To do: implement camera position, rotation and turn
 
 			v1 = Geometry::RotateAroundAxisY(v1, mesh.angle.y);
 			v2 = Geometry::RotateAroundAxisY(v2, mesh.angle.y);
@@ -232,13 +266,19 @@ void Engine::RenderScene() {
 			float2 p1 = Geometry::ToScreen(v1);
 			float2 p2 = Geometry::ToScreen(v2);
 
-			graphics.DrawLine(p1.x, p1.y, p2.x, p2.y, wireframeColor);
+			ColorBlockTransparent color = wireframeColor;
+			
+			if (i < 8) color = Color::cyan;		// highlight the front face
+			graphics.DrawLine(p1.x, p1.y, p2.x, p2.y, color);
 		}
 
-		output.clear();
-		output += "scale: " + std::to_string(mesh.scale) + ", ";
-		output += "pos.z: " + std::to_string(mesh.pos.z) + ", ";
-		output += "FOV: " + std::to_string(Geometry::FOV);
+		//output.clear();
+		output += "mesh pos: ("		+ NumStr(mesh.pos.x) + ", " + NumStr(mesh.pos.y) + ", " + NumStr(mesh.pos.z) + "), ";
+		output += "mesh scale: "	+ NumStr(mesh.scale) + ", ";
+		output += "z_offset: "		+ NumStr(Geometry::z_offset) + ", ";
+		output += "FOV: "			+ NumStr(Geometry::FOV);
+
+		// To do: Use project13 text rendering
 		SetWindowTitle(hWindow, output);
 	}
 

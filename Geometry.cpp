@@ -10,9 +10,15 @@ float2 Geometry::ToScreen(float3 world) {
 	//screen.y = world.y * (uViewportHeight / 2.f) + uViewportHeight /2.f;
 
 	world.x *= (uViewportHeight / (float) uViewportWidth);
+	world.z *= -1;
 
-	screen.x = (world.x * (world.z * FOV2 + FOV)) * (uViewportWidth / 2.f) + uViewportWidth / 2.f;
-	screen.y = (world.y * (world.z * FOV2 + FOV)) * (uViewportHeight / 2.f * -1) + uViewportHeight /2.f;
+	// To do:
+	// With perspective enabled,
+	// vertices after some max distance is reached should
+	// disappear, collapse into the center instead of escaping it again
+
+	screen.x = (world.x * (world.z * FOV + z_offset)) * (uViewportWidth / 2.f) + uViewportWidth / 2.f;
+	screen.y = (world.y * (world.z * FOV + z_offset)) * (uViewportHeight / 2.f * -1) + uViewportHeight /2.f;
 
 
 	return screen;

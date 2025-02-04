@@ -82,6 +82,7 @@ void Graphics::DrawPixel(int x, int y, ColorBlockTransparent color) {
 }
 
 void Graphics::DrawLine(int x1, int y1, int x2, int y2, ColorBlockTransparent color) {
+	// To do: Figure out why SetDCPenColor does not work as expected or at all
 	unsigned long result = SetDCPenColor(backbuffer_dc, RGB(color.R, color.G, color.B));
 	if (result == CLR_INVALID) {
 		PopupMessage("");

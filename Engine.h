@@ -6,6 +6,7 @@
 #include "Scene.h"
 #include "Input.h"
 #include "Geometry.h"
+#include "ColorDefs.h"
 #include "utils.h"
 
 class Engine {
@@ -18,6 +19,7 @@ public:
 	void OnWindowResize(unsigned int, unsigned int);
 private:
 	void InitCustomScene();
+	void InitObjects();
 
 	void MoveObjects();
 	void ReadInputs();
