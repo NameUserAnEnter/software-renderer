@@ -282,8 +282,8 @@ void Engine::RenderScene() {
 		SetWindowTitle(hWindow, output);
 	}
 
-	graphics.DrawRectangle(20, 20, 140, 70, { 0, 255, 255, 255 });
-	graphics.DrawTriangle(20, 160, 140, 200, 20, 100, { 0, 255, 255, 255 });
-	graphics.DrawQuad(20, 220, 100, 320, 70, 520, 150, 550, { 0, 255, 255, 255 });
+	graphics.DrawRectangle(20, 20, 140, 70, Color::cyan);
+	graphics.DrawTriangle(20, 160, 140, 200, 20, 100, Color::cyan);
+	graphics.DrawQuad(20, 220, 100, 320, 70, 520, 150, 550, Color::cyan);
 }
 

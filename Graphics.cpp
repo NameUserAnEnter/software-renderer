@@ -33,9 +33,6 @@ void Graphics::InitializeBuffers() {
 
 	GetDIBits(frontbuffer_dc, backbuffer_bitmap, 0, uBufferHeight, backbuffer_bytes, (BITMAPINFO*)&backbuffer_bitmapinfo, DIB_RGB_COLORS);
 	SetDIBits(NULL, cleanbuffer_bitmap, 0, uBufferHeight, backbuffer_bytes, (BITMAPINFO*)&backbuffer_bitmapinfo, DIB_RGB_COLORS);
-
-	backbuffer_pen = CreatePen(PS_SOLID, 0, RGB(255, 255, 255));
-	SelectObject(backbuffer_dc, backbuffer_pen);
 }
 
 void Graphics::ReleaseBuffers() {
@@ -43,7 +40,6 @@ void Graphics::ReleaseBuffers() {
 		free(backbuffer_bytes);
 	}
 
-	DeleteObject(backbuffer_pen);
 	DeleteObject(cleanbuffer_bitmap);
 	DeleteObject(backbuffer_bitmap);
 	DeleteDC(backbuffer_dc);
@@ -82,14 +78,14 @@ void Graphics::DrawPixel(int x, int y, ColorBlockTransparent color) {
 }
 
 void Graphics::DrawLine(int x1, int y1, int x2, int y2, ColorBlockTransparent color) {
-	// To do: Figure out why SetDCPenColor does not work as expected or at all
-	unsigned long result = SetDCPenColor(backbuffer_dc, RGB(color.R, color.G, color.B));
-	if (result == CLR_INVALID) {
-		PopupMessage("");
-	}
+	HPEN backbuffer_pen = CreatePen(PS_SOLID, 10, RGB(color.R, color.G, color.B));
+	HGDIOBJ original_obj = SelectObject(backbuffer_dc, backbuffer_pen);
 	
 	MoveToEx(backbuffer_dc, x1, y1, NULL);	// use NULL or nullptr for last parameter
 	LineTo(backbuffer_dc, x2, y2);
+
+	SelectObject(backbuffer_dc, original_obj);
+	DeleteObject(backbuffer_pen);
 }
 
 void Graphics::DrawRectangle(int x1, int y1, int x2, int y2, ColorBlockTransparent color) {

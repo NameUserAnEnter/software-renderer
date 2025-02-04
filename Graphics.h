@@ -5,6 +5,7 @@
 #include "ColorBlock.h"
 #include "ColorBlockTransparent.h"
 #include "utils.h"
+#include "ColorDefs.h" // temporary
 
 class Graphics {
 private:
@@ -15,8 +16,6 @@ private:
 
 	HDC frontbuffer_dc;
 	HDC backbuffer_dc;
-
-	HPEN backbuffer_pen;
 
 	HBITMAP cleanbuffer_bitmap;
 	HBITMAP backbuffer_bitmap;
