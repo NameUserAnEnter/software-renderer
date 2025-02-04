@@ -34,6 +34,7 @@ bool Engine::Update() {
 	// Logic
 	MoveObjects();
 	ReadInputs();
+	Input::UpdateInputs();
 
 	// Clear backbuffer
 	graphics.ClearBackBuffer();
@@ -172,7 +173,7 @@ void Engine::MoveObjects() {
 
 void Engine::ReadInputs() {
 	Mesh* controlled = &scene.meshList.back();
-	float delta = 0.01;
+	float delta = 1.0;
 	float delta_angle = (PI / 4) * 0.02;
 
 	if (Input::Esc) breakOut = true;
