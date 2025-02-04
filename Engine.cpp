@@ -1,6 +1,7 @@
 #include "Engine.h"
 
 float Geometry::FOV = 0.6;
+float Geometry::FOV2 = 0.05;
 unsigned int Geometry::uViewportWidth = 1280;
 unsigned int Geometry::uViewportHeight = 960;
 
@@ -176,7 +177,8 @@ void Engine::MoveObjects() {
 
 void Engine::ReadInputs() {
 	Mesh* controlled = &scene.meshList.back();
-	float delta = 1.0;
+	float delta_pos = 1.0;
+	float delta_fov = 0.01;
 	float delta_angle = (PI / 4) * 0.02;
 
 	if (Input::Esc) breakOut = true;
@@ -192,8 +194,11 @@ void Engine::ReadInputs() {
 	if (Input::Alpha[A]) controlled->angle.z -= delta_angle;
 	if (Input::Alpha[D]) controlled->angle.z += delta_angle;
 
-	if (Input::Mouse[mouse_control::SCROLL_UP])		controlled->pos.z += delta;
-	if (Input::Mouse[mouse_control::SCROLL_DOWN])	controlled->pos.z -= delta;
+	//if (Input::Mouse[mouse_control::SCROLL_UP])		controlled->pos.z += delta_pos;
+	//if (Input::Mouse[mouse_control::SCROLL_DOWN])	controlled->pos.z -= delta_pos;
+
+	if (Input::Mouse[mouse_control::SCROLL_UP])		Geometry::FOV2 += delta_fov;
+	if (Input::Mouse[mouse_control::SCROLL_DOWN])	Geometry::FOV2 -= delta_fov;
 
 	if (Input::Alpha[R]) {
 		controlled->pos = saved_pos;

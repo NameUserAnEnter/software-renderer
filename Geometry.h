@@ -19,6 +19,7 @@ struct Geometry {
 	static float3 RotateAroundAxisZ(float3, float);
 
 	static float FOV;
+	static float FOV2;
 
 	static unsigned int uViewportWidth;
 	static unsigned int uViewportHeight;

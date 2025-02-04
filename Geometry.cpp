@@ -11,21 +11,24 @@ float2 Geometry::ToScreen(float3 world) {
 
 	world.x *= (uViewportHeight / (float) uViewportWidth);
 
-	static const float c = 0.05;
-	screen.x = (world.x * (world.z * c + FOV)) * (uViewportWidth / 2.f) + uViewportWidth / 2.f;
-	screen.y = (world.y * (world.z * c + FOV)) * (uViewportHeight / 2.f * -1) + uViewportHeight /2.f;
+	screen.x = (world.x * (world.z * FOV2 + FOV)) * (uViewportWidth / 2.f) + uViewportWidth / 2.f;
+	screen.y = (world.y * (world.z * FOV2 + FOV)) * (uViewportHeight / 2.f * -1) + uViewportHeight /2.f;
 
 
 	return screen;
 }
 
 float3 Geometry::ToWorld(float2 screen) {
-	float3 world;
-	world.x = (screen.x - uViewportWidth / 2.f) / (uViewportWidth / 2.f);
-	world.y = (screen.y - uViewportHeight / 2.f) / (uViewportHeight / 2.f) * (-1);
-	world.z = 0.0f;
+	//// To do: inspect the formulas and make sure they get exact with x and y
+	// 
+	//float3 world;
+	//world.x = (screen.x - uViewportWidth / 2.f) / (uViewportWidth / 2.f);
+	//world.y = (screen.y - uViewportHeight / 2.f) / (uViewportHeight / 2.f) * (-1);
+	//world.z = 0.0f;
 
-	return world;
+	//return world;
+
+	return { 0, 0, 0 };
 }
 
 float3 Geometry::Translate(float3 origin, float3 offset) {
