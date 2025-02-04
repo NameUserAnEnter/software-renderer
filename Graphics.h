@@ -16,6 +16,8 @@ private:
 	HDC frontbuffer_dc;
 	HDC backbuffer_dc;
 
+	HPEN backbuffer_pen;
+
 	HBITMAP cleanbuffer_bitmap;
 	HBITMAP backbuffer_bitmap;
 
@@ -31,13 +33,23 @@ public:
 	void InitializeBuffers();
 	void ReleaseBuffers();
 
-	// Rasterizer operations drawing on the backbuffer
+	//		Rasterizer operations drawing on the backbuffer
+	// Direct bitmap rasterizing
 	void DrawBitmap(int x, int y, int width, int height, ColorBlockTransparent* bytes);
+
+	// Core rasterizing
 	void DrawPixel(int x, int y, ColorBlockTransparent color);
 	void DrawLine(int x1, int y1, int x2, int y2, ColorBlockTransparent color);
+
+	// Geometry outlines
 	void DrawRectangle(int x1, int y1, int x2, int y2, ColorBlockTransparent color);
 	void DrawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, ColorBlockTransparent color);
 	void DrawQuad(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, ColorBlockTransparent color);
+
+	// Filled geometry
+	void DrawRectangleF(int x1, int y1, int x2, int y2, ColorBlockTransparent color);
+	void DrawTriangleF(int x1, int y1, int x2, int y2, int x3, int y3, ColorBlockTransparent color);
+	void DrawQuadF(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, ColorBlockTransparent color);
 
 	void ClearBackBuffer();
 	void UpdateFrontBuffer();

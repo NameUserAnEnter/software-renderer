@@ -161,8 +161,8 @@ void Engine::InitCustomScene() {
 	cube.AddVertex(v222);
 
 	cube.scale = 0.6;
-	cube.pos = { 0.0, 0.0, 0.0 };
-	cube.angle = { 0.0, 0, 0.0 };
+	cube.pos = { 0, 0, 0 };
+	cube.angle = { 0, PI / 4, 0 };
 
 	scene.Begin();
 	scene.AddMesh(cube);
@@ -206,11 +206,11 @@ void Engine::RenderScene() {
 			float3 v1 = mesh.vertices[i - 1];
 			float3 v2 = mesh.vertices[i];
 
-			v1 = Geometry::RotateAroundAxisX(v1, mesh.angle.x);
-			v2 = Geometry::RotateAroundAxisX(v2, mesh.angle.x);
-
 			v1 = Geometry::RotateAroundAxisY(v1, mesh.angle.y);
 			v2 = Geometry::RotateAroundAxisY(v2, mesh.angle.y);
+
+			v1 = Geometry::RotateAroundAxisX(v1, mesh.angle.x);
+			v2 = Geometry::RotateAroundAxisX(v2, mesh.angle.x);
 
 			v1 = Geometry::RotateAroundAxisZ(v1, mesh.angle.z);
 			v2 = Geometry::RotateAroundAxisZ(v2, mesh.angle.z);
@@ -227,10 +227,15 @@ void Engine::RenderScene() {
 			graphics.DrawLine(p1.x, p1.y, p2.x, p2.y, wireframeColor);
 		}
 
-		//SetWindowTitle(hWindow, "scale: " + std::to_string(mesh.scale) + ", pos.z: " + std::to_string(mesh.pos.z) + ", FOV: " + std::to_string(Geometry::FOV));
+		output.clear();
+		output += "scale: " + std::to_string(mesh.scale) + ", ";
+		output += "pos.z: " + std::to_string(mesh.pos.z) + ", ";
+		output += "FOV: " + std::to_string(Geometry::FOV);
+		SetWindowTitle(hWindow, output);
 	}
 
 	graphics.DrawRectangle(20, 20, 140, 70, { 0, 255, 255, 255 });
-	graphics.DrawTriangle(20, 120, 140, 200, 20, 100, { 0, 255, 255, 255 });
+	graphics.DrawTriangle(20, 160, 140, 200, 20, 100, { 0, 255, 255, 255 });
+	graphics.DrawQuad(20, 220, 100, 320, 70, 520, 150, 550, { 0, 255, 255, 255 });
 }
 

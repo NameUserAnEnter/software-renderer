@@ -33,6 +33,9 @@ void Graphics::InitializeBuffers() {
 
 	GetDIBits(frontbuffer_dc, backbuffer_bitmap, 0, uBufferHeight, backbuffer_bytes, (BITMAPINFO*)&backbuffer_bitmapinfo, DIB_RGB_COLORS);
 	SetDIBits(NULL, cleanbuffer_bitmap, 0, uBufferHeight, backbuffer_bytes, (BITMAPINFO*)&backbuffer_bitmapinfo, DIB_RGB_COLORS);
+
+	backbuffer_pen = CreatePen(PS_SOLID, 0, RGB(255, 255, 255));
+	SelectObject(backbuffer_dc, backbuffer_pen);
 }
 
 void Graphics::ReleaseBuffers() {
@@ -40,6 +43,7 @@ void Graphics::ReleaseBuffers() {
 		free(backbuffer_bytes);
 	}
 
+	DeleteObject(backbuffer_pen);
 	DeleteObject(cleanbuffer_bitmap);
 	DeleteObject(backbuffer_bitmap);
 	DeleteDC(backbuffer_dc);
@@ -78,43 +82,42 @@ void Graphics::DrawPixel(int x, int y, ColorBlockTransparent color) {
 }
 
 void Graphics::DrawLine(int x1, int y1, int x2, int y2, ColorBlockTransparent color) {
-	if (x1 == x2) {
-		for (int i = 0; i < abs(y1 - y2); i++) {
-			DrawPixel(x1, min(y1, y2) + i, color);
-		}
-		return;
+	unsigned long result = SetDCPenColor(backbuffer_dc, RGB(color.R, color.G, color.B));
+	if (result == CLR_INVALID) {
+		PopupMessage("");
 	}
-
-	double slope = (y2 - y1) / (double)(x2 - x1);
-	for (int i = 0; i < abs(x2 - x1); i++) {
-		if (x1 < x2) {
-			DrawPixel(x1 + i, y1 + i * slope, color);
-		}
-		else {
-			DrawPixel(x2 + i, y2 + i * slope, color);
-		}
-	}
-
-	// y     = slope * x | / x
-	// y / x = slope
+	
+	MoveToEx(backbuffer_dc, x1, y1, NULL);	// use NULL or nullptr for last parameter
+	LineTo(backbuffer_dc, x2, y2);
 }
 
 void Graphics::DrawRectangle(int x1, int y1, int x2, int y2, ColorBlockTransparent color) {
-	for (int i = 0; i < abs(y2 - y1); i++) {
-		for (int j = 0; j < abs(x2 - x1); j++) {
-			DrawPixel(min(x1, x2) + j, min(y1, y2) + i, color);
-		}
-	}
+	DrawLine(x1, y1, x2, y1, color);
+	DrawLine(x2, y1, x2, y2, color);
+	DrawLine(x2, y2, x1, y2, color);
+	DrawLine(x1, y2, x1, y1, color);
 }
 
 void Graphics::DrawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, ColorBlockTransparent color) {
 	DrawLine(x1, y1, x2, y2, color);
 	DrawLine(x2, y2, x3, y3, color);
-	DrawLine(x3, y3, x1, x2, color);
+	DrawLine(x3, y3, x1, y1, color);
 }
 
 void Graphics::DrawQuad(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, ColorBlockTransparent color) {
-	//
+	DrawLine(x1, y1, x2, y2, color);
+	DrawLine(x2, y2, x4, y4, color);
+	DrawLine(x4, y4, x3, y3, color);
+	DrawLine(x3, y3, x1, y1, color);
+}
+
+void Graphics::DrawRectangleF(int x1, int y1, int x2, int y2, ColorBlockTransparent color) {
+}
+
+void Graphics::DrawTriangleF(int x1, int y1, int x2, int y2, int x3, int y3, ColorBlockTransparent color) {
+}
+
+void Graphics::DrawQuadF(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, ColorBlockTransparent color) {
 }
 
 void Graphics::ClearBackBuffer() {

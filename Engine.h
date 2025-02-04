@@ -31,6 +31,8 @@ private:
 	Graphics graphics;
 
 	ColorBlockTransparent wireframeColor;
+
+	std::string output;
 };
 
 #endif

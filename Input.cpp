@@ -24,8 +24,7 @@ bool Input::Arrow[4] = { };
 unsigned int Input::Sub_mouse_x = 0;
 unsigned int Input::Sub_mouse_y = 0;
 
-void Input::SetInputs(bool state, unsigned long long input_code)
-{
+void Input::SetInputs(bool state, unsigned long long input_code) {
 	if (input_code == VK_ESCAPE)		Esc = state;
 	else if (input_code == VK_RETURN)	Enter = state;
 	else if (input_code == VK_SPACE)	Space = state;
@@ -83,8 +82,7 @@ void Input::SetInputs(bool state, unsigned long long input_code)
 	else if (input_code == VK_LEFT)		Arrow[arrow::LEFT] = state;
 }
 
-void Input::SetInputs(bool state, unsigned long long data1, long long data2)
-{
+void Input::SetInputs(bool state, unsigned long long data1, long long data2) {
 	if ((data1 & MK_LBUTTON) == MK_LBUTTON)	Mouse[mouse_control::LMB] = state;
 	if ((data1 & MK_MBUTTON) == MK_MBUTTON)	Mouse[mouse_control::MMB] = state;
 	if ((data1 & MK_RBUTTON) == MK_RBUTTON)	Mouse[mouse_control::RMB] = state;
@@ -101,8 +99,7 @@ void Input::SetInputs(bool state, unsigned long long data1, long long data2)
 	//}
 }
 
-void Input::SetScroll(unsigned long long data1, long long data2)
-{
+void Input::SetScroll(unsigned long long data1, long long data2) {
 	short delta = (short) HIWORD(data1);
 
 	if (delta > 0) Mouse[mouse_control::SCROLL_UP] = true;
@@ -114,8 +111,7 @@ void Input::SetScroll(unsigned long long data1, long long data2)
 	}
 }
 
-void Input::SetMousePos(long long data)
-{
+void Input::SetMousePos(long long data) {
 	short last_x = Mouse_x;
 	short last_y = Mouse_y;
 
@@ -127,15 +123,13 @@ void Input::SetMousePos(long long data)
 }
 
 
-void Input::ReleaseMouseControls()
-{
+void Input::ReleaseMouseControls() {
 	Mouse[mouse_control::LMB] = false;
 	Mouse[mouse_control::MMB] = false;
 	Mouse[mouse_control::RMB] = false;
 }
 
-void Input::UpdateInputs()
-{
+void Input::UpdateInputs() {
 	Mouse[SCROLL_UP] = false;
 	Mouse[SCROLL_DOWN] = false;
 }

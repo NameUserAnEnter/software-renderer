@@ -5,7 +5,7 @@ LRESULT WndProc(HWND, UINT, WPARAM, LPARAM);
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	HWND hWnd;
-	HBRUSH hbrBackground = CreateSolidBrush(RGB(10, 0, 30));
+	HBRUSH hbrBackground = CreateSolidBrush(RGB(30, 0, 90));
 	unsigned int uWindowWidth = Geometry::uViewportWidth;
 	unsigned int uWindowHeight = Geometry::uViewportHeight;
 	wchar_t szWindowClass[] = L"window class";
@@ -63,7 +63,6 @@ LRESULT WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	switch (uMsg) {
 		case WM_MOUSEWHEEL:
 			Input::SetScroll(wParam, lParam);
-			SetWindowTitle(hWnd, std::to_string((short)HIWORD(wParam)));
 			break;
 		case WM_KEYUP:
 			Input::SetInputs(false, wParam);

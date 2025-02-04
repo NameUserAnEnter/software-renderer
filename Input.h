@@ -3,8 +3,7 @@
 
 #include <windows.h>
 
-enum alphabet
-{
+enum alphabet {
 	A, B, C,
 	D, E, F,
 	G, H, I,
@@ -15,18 +14,15 @@ enum alphabet
 	W, X, Y, Z
 };
 
-enum mouse_control
-{
+enum mouse_control {
 	LMB, MMB, RMB, SCROLL_UP, SCROLL_DOWN, MOVE
 };
 
-enum arrow
-{
+enum arrow {
 	UP, DOWN, RIGHT, LEFT
 };
 
-struct Input
-{
+struct Input {
 	static bool Alpha[26];
 	static bool Numeric[10];
 
