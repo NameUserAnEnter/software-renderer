@@ -1,29 +1,38 @@
 #include "Engine.h"
 
-float Geometry::z_offset = 1;
-float Geometry::FOV = 0.06;
-unsigned int Geometry::uViewportWidth = 1280;
-unsigned int Geometry::uViewportHeight = 960;
-
-void Engine::Init(HWND hWindow) {
-	this->hWindow = hWindow;
-
+Engine::Engine() {
 	bStop = false;
+
+	windowX = 0;
+	windowY = 0;
+
+	uWindowWidth = 1280;
+	uWindowHeight = 960;
+	windowTitle = L"Preview";
+
+	wireframeColor	= Color::white;
+	backgroundColor = Color::dark_purple;
+}
+
+void Engine::Init(HWND hWnd) {
+	if (!hWnd) {
+		StopEngine();
+		return;
+	}
+
+	hWindow = hWnd;
 
 	RECT ClientRect;
 	GetClientRect(hWindow, &ClientRect);
 
-	unsigned int uClientWidth = ClientRect.right;
-	unsigned int uClientHeight = ClientRect.bottom;
-
-	Geometry::uViewportWidth = uClientWidth;
-	Geometry::uViewportHeight = uClientHeight;
+	viewport.z_offset = 1;
+	viewport.FOV = 0.06;
+	viewport.uViewportWidth = ClientRect.right;
+	viewport.uViewportHeight = ClientRect.bottom;
 
 	graphics.Init(hWindow);
-	graphics.ResizeBuffers(uClientWidth, uClientHeight);		// also calls InitializeBuffers()
+	graphics.ResizeBuffers(ClientRect.right, ClientRect.bottom);		// also calls InitializeBuffers()
 	graphics.SetRasterUnitThickness(5);
-
-	wireframeColor = Color::white;
 
 	InitCustomScene();
 }
@@ -34,10 +43,11 @@ void Engine::Release() {
 }
 
 void Engine::Update() {
+	output += NumStr(viewport.uViewportWidth) + "x" + NumStr(viewport.uViewportHeight) + ", ";
+
 	// Logic
 	ReadUserInput();
 	Input::UpdateInputs();
-
 	UpdateOutput();
 
 	// Clear backbuffer
@@ -58,11 +68,15 @@ bool Engine::Done() {
 	return bStop;
 }
 
+float2 Engine::ViewportSize() {
+	return { viewport.uViewportWidth, viewport.uViewportHeight };
+}
+
 void Engine::OnWindowResize(unsigned int uNewClientWidth, unsigned int uNewClientHeight) {
 	graphics.ResizeBuffers(uNewClientWidth, uNewClientHeight);
 
-	Geometry::uViewportWidth = uNewClientWidth;
-	Geometry::uViewportHeight = uNewClientHeight;
+	viewport.uViewportWidth = uNewClientWidth;
+	viewport.uViewportHeight = uNewClientHeight;
 }
 
 void Engine::InitCustomScene() {
@@ -163,8 +177,8 @@ void Engine::ReadUserInput() {
 	// To do: implement sliders to change those values and/or buttons to change scroll mode
 	std::vector<float*> scrollable_values;
 	scrollable_values.push_back(&controlled.scale.z);
-	scrollable_values.push_back(&Geometry::z_offset);
-	scrollable_values.push_back(&Geometry::FOV);
+	scrollable_values.push_back(&viewport.z_offset);
+	scrollable_values.push_back(&viewport.FOV);
 
 	static unsigned int scroll_mode = 0;
 
@@ -172,7 +186,6 @@ void Engine::ReadUserInput() {
 	if (Input::Alpha[X]) scroll_mode = 1;
 	if (Input::Alpha[C]) scroll_mode = 2;
 
-	output.clear();
 	output += "scroll mode: " + NumStr(scroll_mode) + ", ";
 
 	if (Input::Shift) delta_scroll *= 10;
@@ -186,8 +199,8 @@ void Engine::UpdateOutput() {
 
 	output += "cube pos: ("		+ NumStr(cube.pos.x) + ", " + NumStr(cube.pos.y) + ", " + NumStr(cube.pos.z) + "), ";
 	output += "cube scale: ("	+ NumStr(cube.scale.x) + ", " + NumStr(cube.scale.y) + ", " + NumStr(cube.scale.z) + "), ";
-	output += "z_offset: "		+ NumStr(Geometry::z_offset) + ", ";
-	output += "FOV: "			+ NumStr(Geometry::FOV);
+	output += "z_offset: "		+ NumStr(viewport.z_offset) + ", ";
+	output += "FOV: "			+ NumStr(viewport.FOV);
 
 	// To do: Use project13 text rendering
 	SetWindowTitle(hWindow, output);
@@ -239,6 +252,6 @@ float2 Engine::VertexToPixel(Vertex vertex, Transformation t) {
 
 	pos= Geometry::Translate(pos, t.pos);
 
-	return Geometry::ToScreen(pos);
+	return viewport.ToScreen(pos);
 }
 

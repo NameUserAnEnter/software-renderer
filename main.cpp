@@ -4,10 +4,9 @@
 LRESULT WndProc(HWND, UINT, WPARAM, LPARAM);
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
-	HWND hWnd;
-	HBRUSH hbrBackground = CreateSolidBrush(RGB(30, 0, 90));
-	unsigned int uWindowWidth = Geometry::uViewportWidth;
-	unsigned int uWindowHeight = Geometry::uViewportHeight;
+	Engine	engine;		// default constructor sets some variables to be used for CreateWindow(), hence object is created here already
+	HWND	hWnd;
+
 	wchar_t szWindowClass[] = L"window class";
 
 	WNDCLASSEX wcex;
@@ -19,11 +18,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	wcex.hInstance = hInstance;
 	wcex.lpszClassName = szWindowClass;
-	wcex.hbrBackground = hbrBackground;
+	wcex.hbrBackground = CreateSolidBrush(RGB(engine.backgroundColor.R, engine.backgroundColor.G, engine.backgroundColor.B));
 
 	RegisterClassEx(&wcex);
-	hWnd = CreateWindow(szWindowClass, L"Main", WS_OVERLAPPEDWINDOW, 0, 0, uWindowWidth, uWindowHeight, NULL, NULL, hInstance, NULL);
-	if (hWnd == NULL) {
+
+	hWnd = CreateWindow(szWindowClass,
+		engine.windowTitle.c_str(),
+		WS_OVERLAPPEDWINDOW,
+		engine.windowX, engine.windowY,
+		engine.uWindowWidth, engine.uWindowHeight,
+		NULL, NULL, hInstance, NULL);
+
+	if (!hWnd) {
 		MessageBox(NULL, L"Cannot create application window.", L"Error", MB_OK);
 		return 1;
 	}
@@ -33,9 +39,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	MSG msg;
 
-	Engine engine;
 	engine.Init(hWnd);
-
 	while (!engine.Done()) {
 		engine.Update();
 

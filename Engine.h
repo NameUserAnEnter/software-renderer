@@ -6,11 +6,14 @@
 #include "Scene.h"
 #include "Input.h"
 #include "Geometry.h"
+#include "Viewport.h"
 #include "ColorDefs.h"
 #include "utils.h"
 
 class Engine {
 public:
+	Engine();
+
 	void Init(HWND);
 	void Release();
 
@@ -19,7 +22,10 @@ public:
 	void StopEngine();
 	bool Done();
 
+	float2 ViewportSize();
+
 	void OnWindowResize(unsigned int, unsigned int);
+
 private:
 	void InitCustomScene();
 	void InitModels();
@@ -30,14 +36,24 @@ private:
 
 	float2 VertexToPixel(Vertex, Transformation);
 
+public:
+	int windowX, windowY;
+
+	unsigned int uWindowWidth;
+	unsigned int uWindowHeight;
+	std::wstring windowTitle;
+
+	ColorBlockTransparent wireframeColor;
+	ColorBlockTransparent backgroundColor;
+
+private:
 	HWND hWindow;
 	
 	bool bStop;
 
-	Scene scene;
 	Graphics graphics;
-
-	ColorBlockTransparent wireframeColor;
+	Scene scene;
+	Viewport viewport;
 
 	std::string output;
 

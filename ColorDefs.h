@@ -15,7 +15,8 @@ namespace Color {
 	static const ColorBlockTransparent green	= { 0, 255, 0, 255 };
 	static const ColorBlockTransparent blue		= { 0, 0, 255, 255 };
 
-	static const ColorBlockTransparent purple	= { 170, 0, 255, 255 };
+	static const ColorBlockTransparent purple		= { 170, 0, 255, 255 };
+	static const ColorBlockTransparent dark_purple	= {  30, 0,  90, 255 };
 };
 
 #endif

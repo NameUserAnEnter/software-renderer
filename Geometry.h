@@ -5,13 +5,9 @@
 
 #include "Float.h"
 #include "utils.h"
-#include <Windows.h>
 #include <math.h>
 
 struct Geometry {
-	static float2 ToScreen(float3);
-	static float3 ApproxWorldCoordinates(float2);
-
 	static float3 Translate(float3, float3);
 
 	static float3 Scale(float3, float3);
@@ -23,12 +19,6 @@ struct Geometry {
 	static float3 RotateAroundAxisX(float3, float);
 	static float3 RotateAroundAxisY(float3, float);
 	static float3 RotateAroundAxisZ(float3, float);
-
-	static float z_offset;
-	static float FOV;
-
-	static unsigned int uViewportWidth;
-	static unsigned int uViewportHeight;
 };
 
 #endif
