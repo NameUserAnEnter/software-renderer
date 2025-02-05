@@ -84,10 +84,6 @@ void Engine::InitCustomScene() {
 
 	Transformation& cube = scene.meshList.back().t;
 
-	cube.scale = { 1, 1, 1 };
-	cube.pos = { 0, 0, 0 };
-	cube.angle = { 0, 0, 0 };
-
 	cube.scale = { 0.6, 0.6, 0.6 };
 	cube.pos = { 0, 0, 0 };
 	cube.angle = { PI / 8, 0, 0 };

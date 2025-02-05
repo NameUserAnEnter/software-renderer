@@ -3,6 +3,7 @@
 
 #include "MeshElements.h"
 #include "Transformation.h"
+#include "Geometry.h"
 #include <vector>
 
 class Mesh {
