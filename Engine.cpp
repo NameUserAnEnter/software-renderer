@@ -82,15 +82,15 @@ void Engine::OnWindowResize(unsigned int uNewClientWidth, unsigned int uNewClien
 void Engine::InitCustomScene() {
 	InitModels();
 
-	Transformation& cube = scene.meshList.back().t;
+	Mesh& cube = scene.meshList.back();
 
-	cube.scale = { 0.6, 0.6, 0.6 };
-	cube.pos = { 0, 0, 0 };
-	cube.angle = { PI / 8, 0, 0 };
-	//cube.angle = { PI / 8, PI / 6, 0 };
+	cube.t.scale = { 0.6, 0.6, 0.6 };
+	cube.t.pos = { 0, 0, 0 };
+	cube.t.angle = { PI / 8, 0, 0 };
+	//cube.t.angle = { PI / 8, PI / 6, 0 };
 
-	saved_pos = cube.pos;
-	saved_angle = cube.angle;
+	saved_pos = cube.t.pos;
+	saved_angle = cube.t.angle;
 }
 
 void Engine::InitModels() {
@@ -194,6 +194,7 @@ void Engine::UpdateOutput() {
 	Transformation cube = scene.meshList.back().t;
 
 	output += "cube pos: ("		+ NumStr(cube.pos.x) + ", " + NumStr(cube.pos.y) + ", " + NumStr(cube.pos.z) + "), ";
+	output += "cube angle: ("	+ NumStr(cube.angle.x) + ", " + NumStr(cube.angle.y) + ", " + NumStr(cube.angle.z) + "), ";
 	output += "cube scale: ("	+ NumStr(cube.scale.x) + ", " + NumStr(cube.scale.y) + ", " + NumStr(cube.scale.z) + "), ";
 	output += "z_offset: "		+ NumStr(viewport.z_offset) + ", ";
 	output += "FOV: "			+ NumStr(viewport.FOV);

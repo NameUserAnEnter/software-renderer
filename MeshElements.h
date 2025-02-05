@@ -7,8 +7,10 @@
 struct Vertex {
 	float x, y, z;
 
-	Vertex operator=(float3 f) {
-		return { f.x, f.y, f.z };
+	void operator=(float3 f) {
+		x = f.x;
+		y = f.y;
+		z = f.z;
 	}
 };
 
