@@ -1,7 +1,7 @@
 #ifndef SCENE_H
 #define SCENE_H
 
-#include "Model.h"
+#include "Mesh.h"
 #include <vector>
 
 class Scene {
@@ -9,9 +9,9 @@ public:
 	void Begin();
 	void End();
 
-	void AddModel(Model);
+	void AddMesh(Mesh);
 public:
-	std::vector<Model> models;
+	std::vector<Mesh> meshList;
 };
 
 #endif

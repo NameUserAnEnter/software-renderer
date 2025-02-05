@@ -1,14 +1,14 @@
 #include "Scene.h"
 
 void Scene::Begin() {
-	models.clear();
+	meshList.clear();
 }
 
 void Scene::End() {
-	models.clear();
+	meshList.clear();
 }
 
-void Scene::AddModel(Model model) {
-	models.push_back(model);
+void Scene::AddMesh(Mesh mesh) {
+	meshList.push_back(mesh);
 }
 

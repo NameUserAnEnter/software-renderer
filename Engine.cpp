@@ -68,7 +68,7 @@ void Engine::OnWindowResize(unsigned int uNewClientWidth, unsigned int uNewClien
 void Engine::InitCustomScene() {
 	InitModels();
 
-	Model& cube = scene.models.back();
+	Mesh& cube = scene.meshList.back();
 
 	cube.scale = 1;
 	cube.pos = { 0, 0, 0 };
@@ -84,7 +84,7 @@ void Engine::InitCustomScene() {
 }
 
 void Engine::InitModels() {
-	Model cube;
+	Mesh cube;
 
 	float3 v111 = { -1,  1, -1 };
 	float3 v211 = {  1,  1, -1 };
@@ -121,24 +121,24 @@ void Engine::InitModels() {
 	//    121                                221
 	//
 
-	cube.AddPoint(v111);
-	cube.AddPoint(v211);
-	cube.AddPoint(v121);
-	cube.AddPoint(v221);
+	cube.AddVertex(v111);
+	cube.AddVertex(v211);
+	cube.AddVertex(v121);
+	cube.AddVertex(v221);
 
-	cube.AddPoint(v112);
-	cube.AddPoint(v212);
-	cube.AddPoint(v122);
-	cube.AddPoint(v222);
+	cube.AddVertex(v112);
+	cube.AddVertex(v212);
+	cube.AddVertex(v122);
+	cube.AddVertex(v222);
 
 	scene.Begin();
-	scene.AddModel(cube);
+	scene.AddMesh(cube);
 }
 
 void Engine::ReadUserInput() {
 	if (Input::Esc) StopEngine();
 
-	Model& controlled = scene.models.back();
+	Mesh& controlled = scene.meshList.back();
 
 	float delta_pos = 0.01;
 	float delta_scroll = 0.01;
@@ -173,7 +173,7 @@ void Engine::ReadUserInput() {
 	if (Input::Alpha[C]) scroll_mode = 2;
 
 	output.clear();
-	output += "Scroll mode: " + NumStr(scroll_mode) + ", ";
+	output += "scroll mode: " + NumStr(scroll_mode) + ", ";
 
 	if (Input::Shift) delta_scroll *= 10;
 
@@ -182,9 +182,8 @@ void Engine::ReadUserInput() {
 }
 
 void Engine::UpdateOutput() {
-	Model cube = scene.models.back();
+	Mesh cube = scene.meshList.back();
 
-	//output.clear();
 	output += "cube pos: ("		+ NumStr(cube.pos.x) + ", " + NumStr(cube.pos.y) + ", " + NumStr(cube.pos.z) + "), ";
 	output += "cube scale: "	+ NumStr(cube.scale) + ", ";
 	output += "z_offset: "		+ NumStr(Geometry::z_offset) + ", ";
@@ -192,16 +191,17 @@ void Engine::UpdateOutput() {
 
 	// To do: Use project13 text rendering
 	SetWindowTitle(hWindow, output);
+	output = "";
 }
 
 void Engine::RenderScene() {
-	for (Model model : scene.models) {
-		std::vector<float3> points = model.Points();
+	for (Mesh mesh : scene.meshList) {
+		std::vector<float3> vertices = mesh.Vertices();
 
-		for (int i = 2; i < points.size(); i++) {
-			float3 v0 = points[i - 2];
-			float3 v1 = points[i - 1];
-			float3 v2 = points[i];
+		for (int i = 2; i < vertices.size(); i++) {
+			float3 v0 = vertices[i - 2];
+			float3 v1 = vertices[i - 1];
+			float3 v2 = vertices[i];
 
 			// To do:
 			// Fix transformation pipeline order
@@ -212,9 +212,9 @@ void Engine::RenderScene() {
 			//
 			// To do: implement camera position, rotation and turn
 
-			float2 p0 = VertexToPixel(v0, model);
-			float2 p1 = VertexToPixel(v1, model);
-			float2 p2 = VertexToPixel(v2, model);
+			float2 p0 = VertexToPixel(v0, mesh);
+			float2 p1 = VertexToPixel(v1, mesh);
+			float2 p2 = VertexToPixel(v2, mesh);
 			
 			ColorBlockTransparent color = wireframeColor;
 			if (i < 3) color = Color::cyan;		// highlight something on the front face
@@ -228,14 +228,14 @@ void Engine::RenderScene() {
 	//graphics.DrawQuad(20, 220, 100, 320, 70, 520, 150, 550, Color::cyan);
 }
 
-float2 Engine::VertexToPixel(float3 vertex, Model model) {
-	vertex = Geometry::RotateAroundAxisY(vertex, model.angle.y);
-	vertex = Geometry::RotateAroundAxisX(vertex, model.angle.x);
-	vertex = Geometry::RotateAroundAxisZ(vertex, model.angle.z);
+float2 Engine::VertexToPixel(float3 vertex, Mesh mesh) {
+	vertex = Geometry::RotateAroundAxisY(vertex, mesh.angle.y);
+	vertex = Geometry::RotateAroundAxisX(vertex, mesh.angle.x);
+	vertex = Geometry::RotateAroundAxisZ(vertex, mesh.angle.z);
 
-	vertex = Geometry::Scale(vertex, model.scale);
+	vertex = Geometry::Scale(vertex, mesh.scale);
 
-	vertex= Geometry::Translate(vertex, model.pos);
+	vertex= Geometry::Translate(vertex, mesh.pos);
 
 	return Geometry::ToScreen(vertex);
 }

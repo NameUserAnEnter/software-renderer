@@ -28,7 +28,7 @@ private:
 	void UpdateOutput();
 	void RenderScene();
 
-	float2 VertexToPixel(float3, Model);
+	float2 VertexToPixel(float3, Mesh);
 
 	HWND hWindow;
 	
