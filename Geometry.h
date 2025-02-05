@@ -10,10 +10,16 @@
 
 struct Geometry {
 	static float2 ToScreen(float3);
-	static float3 ToWorld(float2);
+	static float3 ApproxWorldCoordinates(float2);
 
 	static float3 Translate(float3, float3);
+
+	static float3 Scale(float3, float3);
 	static float3 Scale(float3, float);
+	static float3 ScaleX(float3, float);
+	static float3 ScaleY(float3, float);
+	static float3 ScaleZ(float3, float);
+
 	static float3 RotateAroundAxisX(float3, float);
 	static float3 RotateAroundAxisY(float3, float);
 	static float3 RotateAroundAxisZ(float3, float);

@@ -24,7 +24,7 @@ float2 Geometry::ToScreen(float3 world) {
 	return screen;
 }
 
-float3 Geometry::ToWorld(float2 screen) {
+float3 Geometry::ApproxWorldCoordinates(float2 screen) {
 	//// To do: inspect the formulas and make sure they get exact with x and y
 	// 
 	//float3 world;
@@ -41,8 +41,44 @@ float3 Geometry::Translate(float3 origin, float3 offset) {
 	return { origin.x + offset.x, origin.y + offset.y, origin.z + offset.z };
 }
 
+float3 Geometry::Scale(float3 vertex, float3 scale) {
+	return {
+		vertex.x * scale.x,
+		vertex.y * scale.y,
+		vertex.z * scale.z
+	};
+}
+
 float3 Geometry::Scale(float3 vertex, float factor) {
-	return { vertex.x * factor, vertex.y * factor, vertex.z * factor };
+	return {
+		vertex.x * factor,
+		vertex.y * factor,
+		vertex.z * factor
+	};
+}
+
+float3 Geometry::ScaleX(float3 vertex, float factor) {
+	return {
+		vertex.x * factor,
+		vertex.y,
+		vertex.z
+	};
+}
+
+float3 Geometry::ScaleY(float3 vertex, float factor) {
+	return {
+		vertex.x,
+		vertex.y * factor,
+		vertex.z
+	};
+}
+
+float3 Geometry::ScaleZ(float3 vertex, float factor) {
+	return {
+		vertex.x,
+		vertex.y,
+		vertex.z * factor
+	};
 }
 
 float3 Geometry::RotateAroundAxisX(float3 vertex, float angle) {

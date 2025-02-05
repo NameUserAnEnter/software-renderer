@@ -1,25 +1,25 @@
 #ifndef MESH_H
 #define MESH_H
 
-#include "Float.h"
+#include "MeshElements.h"
+#include "Transformation.h"
 #include <vector>
 
 class Mesh {
 public:
 	Mesh();
-
-	void AddVertex(float3);
-	void AddVertex(float x, float y, float z);
-
-	std::vector<float3> Vertices();
-	
 	void Release();
+
+	void AddVertex(Vertex);
+	std::vector<Vertex> Vertices();
+
+	void ApplyTransformation();
+
 private:
-	std::vector<float3> vertices;
+	std::vector<Vertex> vertices;
+
 public:
-	float3 pos;
-	float scale;
-	float3 angle;
+	Transformation t;
 };
 
 #endif

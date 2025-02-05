@@ -68,13 +68,13 @@ void Engine::OnWindowResize(unsigned int uNewClientWidth, unsigned int uNewClien
 void Engine::InitCustomScene() {
 	InitModels();
 
-	Mesh& cube = scene.meshList.back();
+	Transformation& cube = scene.meshList.back().t;
 
-	cube.scale = 1;
+	cube.scale = { 1, 1, 1 };
 	cube.pos = { 0, 0, 0 };
 	cube.angle = { 0, 0, 0 };
 
-	cube.scale = 0.6;
+	cube.scale = { 0.6, 0.6, 0.6 };
 	cube.pos = { 0, 0, 0 };
 	cube.angle = { PI / 8, 0, 0 };
 	//cube.angle = { PI / 8, PI / 6, 0 };
@@ -86,15 +86,15 @@ void Engine::InitCustomScene() {
 void Engine::InitModels() {
 	Mesh cube;
 
-	float3 v111 = { -1,  1, -1 };
-	float3 v211 = {  1,  1, -1 };
-	float3 v121 = { -1, -1, -1 };
-	float3 v221 = {  1, -1, -1 };
+	Vertex v111 = { -1,  1, -1 };
+	Vertex v211 = {  1,  1, -1 };
+	Vertex v121 = { -1, -1, -1 };
+	Vertex v221 = {  1, -1, -1 };
 
-	float3 v112 = { -1,  1, 1 };
-	float3 v212 = {  1,  1, 1 };
-	float3 v122 = { -1, -1, 1 };
-	float3 v222 = {  1, -1, 1 };
+	Vertex v112 = { -1,  1, 1 };
+	Vertex v212 = {  1,  1, 1 };
+	Vertex v122 = { -1, -1, 1 };
+	Vertex v222 = {  1, -1, 1 };
 
 	//		     112__________________________________212
 	//		       /|                                /
@@ -138,7 +138,7 @@ void Engine::InitModels() {
 void Engine::ReadUserInput() {
 	if (Input::Esc) StopEngine();
 
-	Mesh& controlled = scene.meshList.back();
+	Transformation& controlled = scene.meshList.back().t;
 
 	float delta_pos = 0.01;
 	float delta_scroll = 0.01;
@@ -162,7 +162,7 @@ void Engine::ReadUserInput() {
 
 	// To do: implement sliders to change those values and/or buttons to change scroll mode
 	std::vector<float*> scrollable_values;
-	scrollable_values.push_back(&controlled.scale);
+	scrollable_values.push_back(&controlled.scale.z);
 	scrollable_values.push_back(&Geometry::z_offset);
 	scrollable_values.push_back(&Geometry::FOV);
 
@@ -182,10 +182,10 @@ void Engine::ReadUserInput() {
 }
 
 void Engine::UpdateOutput() {
-	Mesh cube = scene.meshList.back();
+	Transformation cube = scene.meshList.back().t;
 
 	output += "cube pos: ("		+ NumStr(cube.pos.x) + ", " + NumStr(cube.pos.y) + ", " + NumStr(cube.pos.z) + "), ";
-	output += "cube scale: "	+ NumStr(cube.scale) + ", ";
+	output += "cube scale: ("	+ NumStr(cube.scale.x) + ", " + NumStr(cube.scale.y) + ", " + NumStr(cube.scale.z) + "), ";
 	output += "z_offset: "		+ NumStr(Geometry::z_offset) + ", ";
 	output += "FOV: "			+ NumStr(Geometry::FOV);
 
@@ -196,12 +196,12 @@ void Engine::UpdateOutput() {
 
 void Engine::RenderScene() {
 	for (Mesh mesh : scene.meshList) {
-		std::vector<float3> vertices = mesh.Vertices();
+		std::vector<Vertex> vertices = mesh.Vertices();
 
 		for (int i = 2; i < vertices.size(); i++) {
-			float3 v0 = vertices[i - 2];
-			float3 v1 = vertices[i - 1];
-			float3 v2 = vertices[i];
+			Vertex v0 = vertices[i - 2];
+			Vertex v1 = vertices[i - 1];
+			Vertex v2 = vertices[i];
 
 			// To do:
 			// Fix transformation pipeline order
@@ -212,9 +212,9 @@ void Engine::RenderScene() {
 			//
 			// To do: implement camera position, rotation and turn
 
-			float2 p0 = VertexToPixel(v0, mesh);
-			float2 p1 = VertexToPixel(v1, mesh);
-			float2 p2 = VertexToPixel(v2, mesh);
+			float2 p0 = VertexToPixel(v0, mesh.t);
+			float2 p1 = VertexToPixel(v1, mesh.t);
+			float2 p2 = VertexToPixel(v2, mesh.t);
 			
 			ColorBlockTransparent color = wireframeColor;
 			if (i < 3) color = Color::cyan;		// highlight something on the front face
@@ -228,15 +228,17 @@ void Engine::RenderScene() {
 	//graphics.DrawQuad(20, 220, 100, 320, 70, 520, 150, 550, Color::cyan);
 }
 
-float2 Engine::VertexToPixel(float3 vertex, Mesh mesh) {
-	vertex = Geometry::RotateAroundAxisY(vertex, mesh.angle.y);
-	vertex = Geometry::RotateAroundAxisX(vertex, mesh.angle.x);
-	vertex = Geometry::RotateAroundAxisZ(vertex, mesh.angle.z);
+float2 Engine::VertexToPixel(Vertex vertex, Transformation t) {
+	float3 pos = { vertex.x, vertex.y, vertex.z };
 
-	vertex = Geometry::Scale(vertex, mesh.scale);
+	pos = Geometry::RotateAroundAxisY(pos, t.angle.y);
+	pos = Geometry::RotateAroundAxisX(pos, t.angle.x);
+	pos = Geometry::RotateAroundAxisZ(pos, t.angle.z);
 
-	vertex= Geometry::Translate(vertex, mesh.pos);
+	pos = Geometry::Scale(pos, t.scale);
 
-	return Geometry::ToScreen(vertex);
+	pos= Geometry::Translate(pos, t.pos);
+
+	return Geometry::ToScreen(pos);
 }
 
