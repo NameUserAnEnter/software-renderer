@@ -8,6 +8,8 @@ unsigned int Geometry::uViewportHeight = 960;
 void Engine::Init(HWND hWindow) {
 	this->hWindow = hWindow;
 
+	bStop = false;
+
 	RECT ClientRect;
 	GetClientRect(hWindow, &ClientRect);
 
@@ -19,9 +21,9 @@ void Engine::Init(HWND hWindow) {
 
 	graphics.Init(hWindow);
 	graphics.ResizeBuffers(uClientWidth, uClientHeight);		// also calls InitializeBuffers()
-	wireframeColor = Color::white;
+	graphics.SetRasterUnitThickness(5);
 
-	breakOut = false;
+	wireframeColor = Color::white;
 
 	InitCustomScene();
 }
@@ -31,11 +33,12 @@ void Engine::Release() {
 	graphics.ReleaseBuffers();
 }
 
-bool Engine::Update() {
+void Engine::Update() {
 	// Logic
-	MoveObjects();
-	ReadInputs();
+	ReadUserInput();
 	Input::UpdateInputs();
+
+	UpdateOutput();
 
 	// Clear backbuffer
 	graphics.ClearBackBuffer();
@@ -45,8 +48,14 @@ bool Engine::Update() {
 
 	// Swap buffers
 	graphics.UpdateFrontBuffer();
+}
 
-	return breakOut;
+void Engine::StopEngine() {
+	bStop = true;
+}
+
+bool Engine::Done() {
+	return bStop;
 }
 
 void Engine::OnWindowResize(unsigned int uNewClientWidth, unsigned int uNewClientHeight) {
@@ -57,9 +66,9 @@ void Engine::OnWindowResize(unsigned int uNewClientWidth, unsigned int uNewClien
 }
 
 void Engine::InitCustomScene() {
-	InitObjects();
+	InitModels();
 
-	Mesh& cube = scene.meshList.back();
+	Model& cube = scene.models.back();
 
 	cube.scale = 1;
 	cube.pos = { 0, 0, 0 };
@@ -74,8 +83,18 @@ void Engine::InitCustomScene() {
 	saved_angle = cube.angle;
 }
 
-void Engine::InitObjects() {
-	Mesh cube;
+void Engine::InitModels() {
+	Model cube;
+
+	float3 v111 = { -1,  1, -1 };
+	float3 v211 = {  1,  1, -1 };
+	float3 v121 = { -1, -1, -1 };
+	float3 v221 = {  1, -1, -1 };
+
+	float3 v112 = { -1,  1, 1 };
+	float3 v212 = {  1,  1, 1 };
+	float3 v122 = { -1, -1, 1 };
+	float3 v222 = {  1, -1, 1 };
 
 	//		     112__________________________________212
 	//		       /|                                /
@@ -102,93 +121,24 @@ void Engine::InitObjects() {
 	//    121                                221
 	//
 
-	float3 v111 = { -1,  1, -1 };
-	float3 v211 = {  1,  1, -1 };
-	float3 v121 = { -1, -1, -1 };
-	float3 v221 = {  1, -1, -1 };
+	cube.AddPoint(v111);
+	cube.AddPoint(v211);
+	cube.AddPoint(v121);
+	cube.AddPoint(v221);
 
-	float3 v112 = { -1,  1, 1 };
-	float3 v212 = {  1,  1, 1 };
-	float3 v122 = { -1, -1, 1 };
-	float3 v222 = {  1, -1, 1 };
-
-	// Front face
-	cube.AddVertex(v111);
-	cube.AddVertex(v211);
-	cube.AddVertex(v221);
-	cube.AddVertex(v111);
-
-	cube.AddVertex(v111);
-	cube.AddVertex(v221);
-	cube.AddVertex(v121);
-	cube.AddVertex(v111);
-
-	// Left face
-	cube.AddVertex(v111);
-	cube.AddVertex(v121);
-	cube.AddVertex(v112);
-	cube.AddVertex(v111);
-
-	cube.AddVertex(v122);
-	cube.AddVertex(v121);
-	cube.AddVertex(v112);
-	cube.AddVertex(v122);
-
-	// Back face
-	cube.AddVertex(v112);
-	cube.AddVertex(v212);
-	cube.AddVertex(v122);
-	cube.AddVertex(v112);
-
-	cube.AddVertex(v222);
-	cube.AddVertex(v122);
-	cube.AddVertex(v212);
-	cube.AddVertex(v222);
-
-	// Right face
-	cube.AddVertex(v212);
-	cube.AddVertex(v222);
-	cube.AddVertex(v211);
-	cube.AddVertex(v212);
-
-	cube.AddVertex(v211);
-	cube.AddVertex(v222);
-	cube.AddVertex(v221);
-	cube.AddVertex(v211);
-
-	// Top face
-	cube.AddVertex(v111);
-	cube.AddVertex(v112);
-	cube.AddVertex(v211);
-	cube.AddVertex(v111);
-
-	cube.AddVertex(v112);
-	cube.AddVertex(v212);
-	cube.AddVertex(v211);
-	cube.AddVertex(v112);
-
-	// Bottom face
-	cube.AddVertex(v121);
-	cube.AddVertex(v122);
-	cube.AddVertex(v222);
-	cube.AddVertex(v121);
-
-	cube.AddVertex(v222);
-	cube.AddVertex(v221);
-	cube.AddVertex(v121);
-	cube.AddVertex(v222);
+	cube.AddPoint(v112);
+	cube.AddPoint(v212);
+	cube.AddPoint(v122);
+	cube.AddPoint(v222);
 
 	scene.Begin();
-	scene.AddMesh(cube);
+	scene.AddModel(cube);
 }
 
-void Engine::MoveObjects() {
-}
+void Engine::ReadUserInput() {
+	if (Input::Esc) StopEngine();
 
-void Engine::ReadInputs() {
-	if (Input::Esc) breakOut = true;
-
-	Mesh* controlled_mesh = &scene.meshList.back();
+	Model& controlled = scene.models.back();
 
 	float delta_pos = 0.01;
 	float delta_scroll = 0.01;
@@ -196,23 +146,23 @@ void Engine::ReadInputs() {
 
 	if (Input::Shift) delta_angle *= 5;
 
-	if (Input::Alpha[Q]) controlled_mesh->angle.y -= delta_angle;
-	if (Input::Alpha[E]) controlled_mesh->angle.y += delta_angle;
+	if (Input::Alpha[Q]) controlled.angle.y -= delta_angle;
+	if (Input::Alpha[E]) controlled.angle.y += delta_angle;
 
-	if (Input::Alpha[W]) controlled_mesh->pos.z += delta_pos;
-	if (Input::Alpha[S]) controlled_mesh->pos.z -= delta_pos;
+	if (Input::Alpha[W]) controlled.pos.z += delta_pos;
+	if (Input::Alpha[S]) controlled.pos.z -= delta_pos;
 
-	if (Input::Alpha[A]) controlled_mesh->pos.x -= delta_pos;
-	if (Input::Alpha[D]) controlled_mesh->pos.x += delta_pos;
+	if (Input::Alpha[A]) controlled.pos.x -= delta_pos;
+	if (Input::Alpha[D]) controlled.pos.x += delta_pos;
 
 	if (Input::Alpha[R]) {
-		controlled_mesh->pos = saved_pos;
-		controlled_mesh->angle = saved_angle;
+		controlled.pos = saved_pos;
+		controlled.angle = saved_angle;
 	}
 
 	// To do: implement sliders to change those values and/or buttons to change scroll mode
 	std::vector<float*> scrollable_values;
-	scrollable_values.push_back(&controlled_mesh->scale);
+	scrollable_values.push_back(&controlled.scale);
 	scrollable_values.push_back(&Geometry::z_offset);
 	scrollable_values.push_back(&Geometry::FOV);
 
@@ -231,13 +181,27 @@ void Engine::ReadInputs() {
 	if (Input::Mouse[mouse_control::SCROLL_UP])		*scrollable_values[scroll_mode] += delta_scroll;
 }
 
-void Engine::RenderScene() {
-	for (Mesh mesh : scene.meshList) {
-		for (int i = 1; i < mesh.vertices.size(); i++) {
-			if (i % 4 == 0) continue;
+void Engine::UpdateOutput() {
+	Model cube = scene.models.back();
 
-			float3 v1 = mesh.vertices[i - 1];
-			float3 v2 = mesh.vertices[i];
+	//output.clear();
+	output += "cube pos: ("		+ NumStr(cube.pos.x) + ", " + NumStr(cube.pos.y) + ", " + NumStr(cube.pos.z) + "), ";
+	output += "cube scale: "	+ NumStr(cube.scale) + ", ";
+	output += "z_offset: "		+ NumStr(Geometry::z_offset) + ", ";
+	output += "FOV: "			+ NumStr(Geometry::FOV);
+
+	// To do: Use project13 text rendering
+	SetWindowTitle(hWindow, output);
+}
+
+void Engine::RenderScene() {
+	for (Model model : scene.models) {
+		std::vector<float3> points = model.Points();
+
+		for (int i = 2; i < points.size(); i++) {
+			float3 v0 = points[i - 2];
+			float3 v1 = points[i - 1];
+			float3 v2 = points[i];
 
 			// To do:
 			// Fix transformation pipeline order
@@ -248,42 +212,31 @@ void Engine::RenderScene() {
 			//
 			// To do: implement camera position, rotation and turn
 
-			v1 = Geometry::RotateAroundAxisY(v1, mesh.angle.y);
-			v2 = Geometry::RotateAroundAxisY(v2, mesh.angle.y);
-
-			v1 = Geometry::RotateAroundAxisX(v1, mesh.angle.x);
-			v2 = Geometry::RotateAroundAxisX(v2, mesh.angle.x);
-
-			v1 = Geometry::RotateAroundAxisZ(v1, mesh.angle.z);
-			v2 = Geometry::RotateAroundAxisZ(v2, mesh.angle.z);
-
-			v1 = Geometry::Scale(v1, mesh.scale);
-			v2 = Geometry::Scale(v2, mesh.scale);
-
-			v1 = Geometry::Translate(v1, mesh.pos);
-			v2 = Geometry::Translate(v2, mesh.pos);
-
-			float2 p1 = Geometry::ToScreen(v1);
-			float2 p2 = Geometry::ToScreen(v2);
-
-			ColorBlockTransparent color = wireframeColor;
+			float2 p0 = VertexToPixel(v0, model);
+			float2 p1 = VertexToPixel(v1, model);
+			float2 p2 = VertexToPixel(v2, model);
 			
-			if (i < 8) color = Color::cyan;		// highlight the front face
-			graphics.DrawLine(p1.x, p1.y, p2.x, p2.y, color);
+			ColorBlockTransparent color = wireframeColor;
+			if (i < 3) color = Color::cyan;		// highlight something on the front face
+
+			graphics.DrawTriangle(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y, color);
 		}
-
-		//output.clear();
-		output += "mesh pos: ("		+ NumStr(mesh.pos.x) + ", " + NumStr(mesh.pos.y) + ", " + NumStr(mesh.pos.z) + "), ";
-		output += "mesh scale: "	+ NumStr(mesh.scale) + ", ";
-		output += "z_offset: "		+ NumStr(Geometry::z_offset) + ", ";
-		output += "FOV: "			+ NumStr(Geometry::FOV);
-
-		// To do: Use project13 text rendering
-		SetWindowTitle(hWindow, output);
 	}
 
-	graphics.DrawRectangle(20, 20, 140, 70, Color::cyan);
-	graphics.DrawTriangle(20, 160, 140, 200, 20, 100, Color::cyan);
-	graphics.DrawQuad(20, 220, 100, 320, 70, 520, 150, 550, Color::cyan);
+	//graphics.DrawRectangle(20, 20, 140, 70, Color::cyan);
+	//graphics.DrawTriangle(20, 160, 140, 200, 20, 100, Color::cyan);
+	//graphics.DrawQuad(20, 220, 100, 320, 70, 520, 150, 550, Color::cyan);
+}
+
+float2 Engine::VertexToPixel(float3 vertex, Model model) {
+	vertex = Geometry::RotateAroundAxisY(vertex, model.angle.y);
+	vertex = Geometry::RotateAroundAxisX(vertex, model.angle.x);
+	vertex = Geometry::RotateAroundAxisZ(vertex, model.angle.z);
+
+	vertex = Geometry::Scale(vertex, model.scale);
+
+	vertex= Geometry::Translate(vertex, model.pos);
+
+	return Geometry::ToScreen(vertex);
 }
 

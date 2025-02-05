@@ -14,20 +14,25 @@ public:
 	void Init(HWND);
 	void Release();
 
-	bool Update();
+	void Update();
+
+	void StopEngine();
+	bool Done();
 
 	void OnWindowResize(unsigned int, unsigned int);
 private:
 	void InitCustomScene();
-	void InitObjects();
+	void InitModels();
 
-	void MoveObjects();
-	void ReadInputs();
+	void ReadUserInput();
+	void UpdateOutput();
 	void RenderScene();
 
-	HWND hWindow;
+	float2 VertexToPixel(float3, Model);
 
-	bool breakOut;
+	HWND hWindow;
+	
+	bool bStop;
 
 	Scene scene;
 	Graphics graphics;

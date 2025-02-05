@@ -36,9 +36,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	Engine engine;
 	engine.Init(hWnd);
 
-	bool bDone = false;
-	while (!bDone) {
-		if (engine.Update()) bDone = true;
+	while (!engine.Done()) {
+		engine.Update();
 
 		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) != 0) {
 			switch (msg.message) {
@@ -46,7 +45,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 					engine.OnWindowResize(LOWORD(msg.lParam), HIWORD(msg.lParam));
 					break;
 				case WM_QUIT:
-					bDone = true;
+					engine.StopEngine();
 					break;
 				default:
 					TranslateMessage(&msg);
