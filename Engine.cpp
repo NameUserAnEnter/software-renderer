@@ -220,22 +220,21 @@ void Engine::RenderScene() {
 			// 
 			// Otherwise the cube is going to be rendered malformed because of e.g. perspective variables being used in the wrong place
 			//
-			// To do: implement camera position, rotation and turn
+			// To do: implement a camera class
+
+			// To do: implement z-buffering or any other hidden-surface/line-determination algorithm
+			// To do: base mesh generation on the .obj format and implement .obj format mesh loading 
 
 			int2 p0 = VertexToPixel(v0, mesh.t);
 			int2 p1 = VertexToPixel(v1, mesh.t);
 			int2 p2 = VertexToPixel(v2, mesh.t);
 			
 			ColorBlock color = wireframeColor;
-			if (i < 3) color = Color::cyan;		// highlight something on the front face
+			if (i < 3) color = Color::cyan;		// highlight something on the front face to test HSD/z-buffering
 
 			graphics.FillTriangle(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y, color);
 		}
 	}
-
-	//graphics.DrawRectangle(20, 20, 140, 70, Color::cyan);
-	//graphics.DrawTriangle(20, 160, 140, 200, 20, 100, Color::cyan);
-	//graphics.DrawQuad(20, 220, 100, 320, 70, 520, 150, 550, Color::cyan);
 }
 
 int2 Engine::VertexToPixel(Vertex vertex, Transformation t) {
