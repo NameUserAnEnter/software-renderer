@@ -6,8 +6,57 @@
 #include "ColorBlockTransparent.h"
 #include "utils.h"
 #include "ColorDefs.h" // temporary
+#include "DimensionalTypes.h"
 
 class Graphics {
+public:
+	void Init(HWND hWindow);
+
+	void InitializeBuffers();
+	void ReleaseBuffers();
+
+	//		Rasterizer operations drawing on the backbuffer
+	// Direct bitmap rasterizing
+	void DrawBitmap(int, int, int, int, ColorBlock*);
+	void DrawBitmap(int2, int2, ColorBlock*);
+
+	//		Core rasterizing
+	void DrawPixel(int, int, ColorBlock);
+	void DrawPixel(int2, ColorBlock);
+	
+	void DrawPoint(int, int, ColorBlock);
+	void DrawPoint(int2, ColorBlock);
+
+	void DrawLine(int, int, int, int, ColorBlock);
+	void DrawLine(int2, int2, ColorBlock);
+
+	// Geometry outlines
+	void DrawTriangle(int, int, int, int, int, int, ColorBlock);
+	void DrawTriangle(int2, int2, int2, ColorBlock);
+
+	void DrawQuad(int, int, int, int, int, int, int, int, ColorBlock);
+	void DrawQuad(int2, int2, int2, int2, ColorBlock);
+
+	// Filled geometry
+	void FillTriangle(int, int, int, int, int, int, ColorBlock);
+	void FillTriangle(int2, int2, int2, ColorBlock);
+
+	void FillQuad(int, int, int, int, int, int, int, int, ColorBlock);
+	void FillQuad(int2, int2, int2, int2, ColorBlock);
+	//		---
+
+	void ClearBackBuffer();
+	void UpdateFrontBuffer();
+
+	void ResizeBuffers(int width, int height);
+
+	bool SetRasterUnitThickness(unsigned int);
+	unsigned int GetRasterUnitThickness();
+
+private:
+	void update_buffer(HDC destination, HDC source);
+	bool within_window(int x, int y);
+
 private:
 	HWND hWindow;
 
@@ -28,40 +77,6 @@ private:
 	unsigned int bytes_per_pixel;
 
 	unsigned int raster_unit_thickness;
-public:
-	void Init(HWND hWindow);
-
-	void InitializeBuffers();
-	void ReleaseBuffers();
-
-	//		Rasterizer operations drawing on the backbuffer
-	// Direct bitmap rasterizing
-	void DrawBitmap(int x, int y, int width, int height, ColorBlockTransparent* bytes);
-
-	// Core rasterizing
-	void DrawPixel(int x, int y, ColorBlockTransparent color);
-	
-	void DrawPoint(int x, int y, ColorBlockTransparent color);
-	void DrawLine(int x1, int y1, int x2, int y2, ColorBlockTransparent color);
-
-	// Geometry outlines
-	void DrawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, ColorBlockTransparent color);
-	void DrawQuad(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, ColorBlockTransparent color);
-
-	// Filled geometry
-	void DrawTriangleF(int x1, int y1, int x2, int y2, int x3, int y3, ColorBlockTransparent color);
-	void DrawQuadF(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, ColorBlockTransparent color);
-
-	void ClearBackBuffer();
-	void UpdateFrontBuffer();
-
-	void ResizeBuffers(int width, int height);
-
-	bool SetRasterUnitThickness(unsigned int);
-	unsigned int GetRasterUnitThickness();
-private:
-	void update_buffer(HDC destination, HDC source);
-	bool within_window(int x, int y);
 };
 
 #endif

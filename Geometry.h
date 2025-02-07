@@ -3,7 +3,7 @@
 
 #define PI 3.14159
 
-#include "Float.h"
+#include "DimensionalTypes.h"
 #include "utils.h"
 #include <math.h>
 

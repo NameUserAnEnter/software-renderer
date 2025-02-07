@@ -122,7 +122,6 @@ void Input::SetMousePos(long long data) {
 	else										Mouse[mouse_control::MOVE] = false;
 }
 
-
 void Input::ReleaseMouseControls() {
 	Mouse[mouse_control::LMB] = false;
 	Mouse[mouse_control::MMB] = false;

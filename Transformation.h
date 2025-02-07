@@ -1,7 +1,7 @@
 #ifndef TRANSFORMATION_H
 #define TRANSFORMATION_H
 
-#include "Float.h"
+#include "DimensionalTypes.h"
 
 struct Transformation {
 	float3 pos;

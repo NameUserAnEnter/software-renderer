@@ -16,11 +16,11 @@ public:
 
 	void ApplyTransformation();
 
-private:
-	std::vector<Vertex> vertices;
-
 public:
 	Transformation t;
+
+private:
+	std::vector<Vertex> vertices;
 };
 
 #endif

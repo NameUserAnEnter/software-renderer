@@ -27,12 +27,12 @@ void Engine::Init(HWND hWnd) {
 
 	viewport.z_offset = 1;
 	viewport.FOV = 0.06;
-	viewport.uViewportWidth = ClientRect.right;
-	viewport.uViewportHeight = ClientRect.bottom;
+	viewport.fViewportWidth = ClientRect.right;
+	viewport.fViewportHeight = ClientRect.bottom;
 
 	graphics.Init(hWindow);
 	graphics.ResizeBuffers(ClientRect.right, ClientRect.bottom);		// also calls InitializeBuffers()
-	graphics.SetRasterUnitThickness(5);
+	//graphics.SetRasterUnitThickness(5);
 
 	InitCustomScene();
 }
@@ -43,7 +43,7 @@ void Engine::Release() {
 }
 
 void Engine::Update() {
-	output += NumStr(viewport.uViewportWidth) + "x" + NumStr(viewport.uViewportHeight) + ", ";
+	output += NumStr(viewport.fViewportWidth) + "x" + NumStr(viewport.fViewportHeight) + ", ";
 
 	// Logic
 	ReadUserInput();
@@ -69,14 +69,14 @@ bool Engine::Done() {
 }
 
 float2 Engine::ViewportSize() {
-	return { viewport.uViewportWidth, viewport.uViewportHeight };
+	return { viewport.fViewportWidth, viewport.fViewportHeight };
 }
 
 void Engine::OnWindowResize(unsigned int uNewClientWidth, unsigned int uNewClientHeight) {
 	graphics.ResizeBuffers(uNewClientWidth, uNewClientHeight);
 
-	viewport.uViewportWidth = uNewClientWidth;
-	viewport.uViewportHeight = uNewClientHeight;
+	viewport.fViewportWidth = uNewClientWidth;
+	viewport.fViewportHeight = uNewClientHeight;
 }
 
 void Engine::InitCustomScene() {
@@ -222,14 +222,14 @@ void Engine::RenderScene() {
 			//
 			// To do: implement camera position, rotation and turn
 
-			float2 p0 = VertexToPixel(v0, mesh.t);
-			float2 p1 = VertexToPixel(v1, mesh.t);
-			float2 p2 = VertexToPixel(v2, mesh.t);
+			int2 p0 = VertexToPixel(v0, mesh.t);
+			int2 p1 = VertexToPixel(v1, mesh.t);
+			int2 p2 = VertexToPixel(v2, mesh.t);
 			
-			ColorBlockTransparent color = wireframeColor;
+			ColorBlock color = wireframeColor;
 			if (i < 3) color = Color::cyan;		// highlight something on the front face
 
-			graphics.DrawTriangle(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y, color);
+			graphics.FillTriangle(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y, color);
 		}
 	}
 
@@ -238,7 +238,7 @@ void Engine::RenderScene() {
 	//graphics.DrawQuad(20, 220, 100, 320, 70, 520, 150, 550, Color::cyan);
 }
 
-float2 Engine::VertexToPixel(Vertex vertex, Transformation t) {
+int2 Engine::VertexToPixel(Vertex vertex, Transformation t) {
 	float3 pos = { vertex.x, vertex.y, vertex.z };
 
 	pos = Geometry::RotateAroundAxisY(pos, t.angle.y);

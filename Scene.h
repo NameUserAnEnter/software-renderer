@@ -10,6 +10,7 @@ public:
 	void End();
 
 	void AddMesh(Mesh);
+
 public:
 	std::vector<Mesh> meshList;
 };

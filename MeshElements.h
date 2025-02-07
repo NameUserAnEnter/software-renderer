@@ -1,7 +1,7 @@
 #ifndef MESHELEMENTS_H
 #define MESHELEMENTS_H
 
-#include "Float.h"
+#include "DimensionalTypes.h"
 #include <vector>
 
 struct Vertex {

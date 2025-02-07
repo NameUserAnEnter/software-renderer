@@ -2,7 +2,6 @@
 #define ENGINE_H
 
 #include "Graphics.h"
-#include "Shape.h"
 #include "Scene.h"
 #include "Input.h"
 #include "Geometry.h"
@@ -34,7 +33,7 @@ private:
 	void UpdateOutput();
 	void RenderScene();
 
-	float2 VertexToPixel(Vertex, Transformation);
+	int2 VertexToPixel(Vertex, Transformation);
 
 public:
 	int windowX, windowY;
@@ -43,8 +42,8 @@ public:
 	unsigned int uWindowHeight;
 	std::wstring windowTitle;
 
-	ColorBlockTransparent wireframeColor;
-	ColorBlockTransparent backgroundColor;
+	ColorBlock wireframeColor;
+	ColorBlock backgroundColor;
 
 private:
 	HWND hWindow;
