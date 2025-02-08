@@ -34,6 +34,7 @@ private:
 	void RenderScene();
 
 	int2 VertexToPixel(Vertex, Transformation);
+	int2 VertexToPixel(Vertex);
 
 public:
 	int windowX, windowY;
@@ -42,7 +43,7 @@ public:
 	unsigned int uWindowHeight;
 	std::wstring windowTitle;
 
-	ColorBlock wireframeColor;
+	ColorBlock drawingColor;
 	ColorBlock backgroundColor;
 
 private:

@@ -15,12 +15,12 @@ struct Vertex {
 };
 
 struct Edge {
-	Vertex a;
-	Vertex b;
+	Vertex& a;
+	Vertex& b;
 };
 
 struct Face {
-	std::vector<Edge> edges;
+	Edge* edges;
 };
 
 #endif

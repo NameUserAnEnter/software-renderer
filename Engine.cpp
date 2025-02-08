@@ -10,7 +10,7 @@ Engine::Engine() {
 	uWindowHeight = 960;
 	windowTitle = L"Preview";
 
-	wireframeColor	= Color::white;
+	drawingColor	= Color::white;
 	backgroundColor = Color::dark_purple;
 }
 
@@ -170,9 +170,11 @@ void Engine::ReadUserInput() {
 		controlled.angle = saved_angle;
 	}
 
+	static float scale = controlled.scale.z;
+
 	// To do: implement sliders to change those values and/or buttons to change scroll mode
 	std::vector<float*> scrollable_values;
-	scrollable_values.push_back(&controlled.scale.z);
+	scrollable_values.push_back(&scale);
 	scrollable_values.push_back(&viewport.z_offset);
 	scrollable_values.push_back(&viewport.FOV);
 
@@ -188,6 +190,8 @@ void Engine::ReadUserInput() {
 
 	if (Input::Mouse[mouse_control::SCROLL_DOWN])	*scrollable_values[scroll_mode] -= delta_scroll;
 	if (Input::Mouse[mouse_control::SCROLL_UP])		*scrollable_values[scroll_mode] += delta_scroll;
+
+	controlled.scale = { scale, scale, scale };
 }
 
 void Engine::UpdateOutput() {
@@ -208,6 +212,10 @@ void Engine::RenderScene() {
 	for (Mesh mesh : scene.meshList) {
 		std::vector<Vertex> vertices = mesh.Vertices();
 
+		// currently using a triangle strip topology;
+		// a change in the topology type requires different mesh data (InitModels) and different mesh processing (the part below)
+		// To do: implement a method to draw meshes taking a topology type and vertex data as args
+		// To do: prioritize a primitive topology / mesh representation that can be established from .obj format mesh data
 		for (int i = 2; i < vertices.size(); i++) {
 			Vertex v0 = vertices[i - 2];
 			Vertex v1 = vertices[i - 1];
@@ -229,12 +237,14 @@ void Engine::RenderScene() {
 			int2 p1 = VertexToPixel(v1, mesh.t);
 			int2 p2 = VertexToPixel(v2, mesh.t);
 			
-			ColorBlock color = wireframeColor;
-			if (i < 3) color = Color::cyan;		// highlight something on the front face to test HSD/z-buffering
+			ColorBlock color = drawingColor;
+			if (i < 3) color = Color::cyan;		// highlight some polygon on the front face to test HSD/z-buffering
 
 			graphics.FillTriangle(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y, color);
 		}
 	}
+
+	// To do: add a grid plane
 }
 
 int2 Engine::VertexToPixel(Vertex vertex, Transformation t) {
@@ -248,6 +258,11 @@ int2 Engine::VertexToPixel(Vertex vertex, Transformation t) {
 
 	pos= Geometry::Translate(pos, t.pos);
 
+	return viewport.ToScreen(pos);
+}
+
+int2 Engine::VertexToPixel(Vertex vertex) {
+	float3 pos = { vertex.x, vertex.y, vertex.z };
 	return viewport.ToScreen(pos);
 }
 
