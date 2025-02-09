@@ -90,7 +90,7 @@ void Engine::InitCustomScene() {
 
 	cube.t.scale = { 0.6, 0.6, 0.6 };
 	cube.t.pos = { 0, 0, 0 };
-	cube.t.angle = { PI / 8, 0, 0 };
+	cube.t.angle = { PI / -8, 0, 0 };
 	//cube.t.angle = { PI / 8, PI / 6, 0 };
 
 	saved_pos = cube.t.pos;
