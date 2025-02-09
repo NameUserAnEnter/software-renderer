@@ -528,33 +528,37 @@ void Engine::DrawTriangleStrip(Mesh mesh) {
 	}
 }
 
-// To do: Use project13 text rendering
-// To do: implement sliders to change values like FOV, z_offset and transformations
+// To do:
+// --- Use project13 text rendering
+// --- Implement temporary buttons and sliders to facilitate fine-tuning and tweaking some values like
+// FOV, z_offset, scroll mode, wireframe switch and transformations
 // 
-// To do: implement a near and far clipping plane and/or
+// --- Implement a near and far clipping plane and/or
 // change the perspective equations so that points would collapse at the center after reaching some distance
 // rather than allowing those points to go past that center point and appear as zoomed-in again
 
-// To do: inspect the formulas in ToWorld and make sure they get exact with x and y
+// --- Inspect the formulas in ToWorld and make sure they get exact with x and y
  
-// To do:
-// Fix transformation pipeline order
+// --- Fix transformation pipeline order
 // Geometry struct needs new methods like PerspectiveTransformation and PerspectiveTransformationReverse, AspectTransformation, ..., and so on
 // Then these methods should be called at the right moment in the pipeline, either by ToScreen or somewhere else
 // 
 // Otherwise the cube is going to be rendered malformed because of e.g. perspective variables being used in the wrong place
 
-// To do: implement a camera class
+// --- Implement a camera class
 
-// To do: implement z-buffering or any other hidden-surface/line-determination algorithm
-// To do: base mesh generation on the .obj format and implement .obj format mesh loading
+// --- Implement z-buffering or any other hidden-surface/line-determination algorithm
+// --- Base mesh generation on the .obj format and implement .obj format mesh loading
 
-// To do: add a grid plane to the scene
+// --- Add a grid plane to the scene
 
-// To do: performance consideration; implement buffer swapping / swap chain by using a pointer, instead of performing bit block transfers to the front buffer
+// --- Performance consideration; implement buffer swapping / swap chain by using a pointer, instead of performing bit block transfers to the front buffer
 
-// To do: implement z-buffering
-// To do: implement culling after z-buffering
+// --- Implement z-buffering
+// --- Implement culling after z-buffering, so that it doesn't get in the way
 
-// To do: implement a flexible vertex format; e.g. color, normals, texture coordinates, etc. in the vertex mesh element structure
+// --- Implement a flexible vertex format; e.g. color, normals, texture coordinates, etc. in the vertex mesh element structure
+
+// --- Move from vectors to pointer arrays, especially in mesh vertex buffers etc.
+// Copying vectors passed as function parameters will decrease performance, instead pass the pointer with array size and operate on data in the array directly
 
