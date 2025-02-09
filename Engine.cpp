@@ -13,7 +13,9 @@ Engine::Engine() {
 	drawingColor	= Color::white;
 	backgroundColor = Color::dark_gray;
 
-	current_topology = TOPOLOGIES::LINE_LIST;
+	current_topology = TOPOLOGIES::TRIANGLE_LIST;
+
+	bWireframe = true;
 }
 
 void Engine::Init(HWND hWnd) {
@@ -259,10 +261,93 @@ void Engine::InitModels() {
 		cube.AddVertex(v121);
 	}
 	else if (current_topology == LINE_STRIP) {
+		// front side
+		cube.AddVertex(v111);
+		cube.AddVertex(v211);
+		cube.AddVertex(v221);
+		cube.AddVertex(v111);
+		cube.AddVertex(v221);
+		cube.AddVertex(v121);
+		cube.AddVertex(v111);
+
+		// to be continued, figured out, changed, fixed, or left undone
 	}
 	else if (current_topology == TRIANGLE_LIST) {
+		// front side
+		cube.AddVertex(v111);
+		cube.AddVertex(v211);
+		cube.AddVertex(v221);
+
+		cube.AddVertex(v111);
+		cube.AddVertex(v221);
+		cube.AddVertex(v121);
+
+		// left side
+		cube.AddVertex(v112);
+		cube.AddVertex(v111);
+		cube.AddVertex(v121);
+
+		cube.AddVertex(v112);
+		cube.AddVertex(v121);
+		cube.AddVertex(v122);
+
+		// back side
+		cube.AddVertex(v212);
+		cube.AddVertex(v222);
+		cube.AddVertex(v122);
+
+		cube.AddVertex(v212);
+		cube.AddVertex(v122);
+		cube.AddVertex(v112);
+
+		// right side
+		cube.AddVertex(v211);
+		cube.AddVertex(v212);
+		cube.AddVertex(v222);
+
+		cube.AddVertex(v211);
+		cube.AddVertex(v222);
+		cube.AddVertex(v221);
+
+		// top side
+		cube.AddVertex(v112);
+		cube.AddVertex(v212);
+		cube.AddVertex(v211);
+
+		cube.AddVertex(v112);
+		cube.AddVertex(v211);
+		cube.AddVertex(v111);
+
+		// bottom side
+		cube.AddVertex(v121);
+		cube.AddVertex(v221);
+		cube.AddVertex(v222);
+
+		cube.AddVertex(v121);
+		cube.AddVertex(v222);
+		cube.AddVertex(v122);
 	}
 	else if (current_topology == TRIANGLE_STRIP) {
+		// front side
+		cube.AddVertex(v211);
+		cube.AddVertex(v221);
+		cube.AddVertex(v111);
+
+		cube.AddVertex(v121);
+
+		// left side
+		cube.AddVertex(v112);
+		cube.AddVertex(v122);
+
+		// back side
+		cube.AddVertex(v212);
+		cube.AddVertex(v222);
+
+		// right side
+		cube.AddVertex(v211);
+		cube.AddVertex(v221);
+
+		// incomplete...
 	}
 
 	scene.Begin();
@@ -337,17 +422,33 @@ void Engine::UpdateOutput() {
 
 void Engine::RenderScene() {
 	for (Mesh mesh : scene.meshList) {
-		// To do: implement z-buffering
-		// To do: implement culling after z-buffering
-
-		if (current_topology == POINT_LIST) DrawPointList(mesh);
-		else if (current_topology == LINE_LIST) DrawLineList(mesh);
-		else if (current_topology == LINE_STRIP) DrawLineStrip(mesh);
-		else if (current_topology == TRIANGLE_LIST) DrawTriangleList(mesh);
-		else if (current_topology == TRIANGLE_STRIP) DrawTriangleStrip(mesh);
+		switch (current_topology) {
+			case POINT_LIST:		DrawPointList(mesh);		break;
+			case LINE_LIST:			DrawLineList(mesh);			break;
+			case LINE_STRIP:		DrawLineStrip(mesh);		break;
+			case TRIANGLE_LIST:		DrawTriangleList(mesh);		break;
+			case TRIANGLE_STRIP:	DrawTriangleStrip(mesh);	break;
+		}
 	}
 
+	// To do:
+	// Fix transformation pipeline order
+	// Geometry struct needs new methods like PerspectiveTransformation and PerspectiveTransformationReverse, AspectTransformation, ..., and so on
+	// Then these methods should be called at the right moment in the pipeline, either by ToScreen or somewhere else
+	// 
+	// Otherwise the cube is going to be rendered malformed because of e.g. perspective variables being used in the wrong place
+	//
+	// To do: implement a camera class
+
+	// To do: implement z-buffering or any other hidden-surface/line-determination algorithm
+	// To do: base mesh generation on the .obj format and implement .obj format mesh loading
+
 	// To do: add a grid plane
+
+	// To do: implement z-buffering
+	// To do: implement culling after z-buffering
+
+	// To do: implement a flexible vertex format; e.g. color, normals, texture coordinates, etc. in the vertex mesh element structure
 }
 
 int2 Engine::VertexToPixel(Vertex vertex, Transformation t) {
@@ -383,7 +484,6 @@ void Engine::DrawPointList(Mesh mesh) {
 void Engine::DrawLineList(Mesh mesh) {
 	std::vector<Vertex> vertices = mesh.Vertices();
 
-	// attention construction site here
 	for (int i = 1; i < vertices.size(); i += 2) {
 		Vertex v0 = vertices[i - 1];
 		Vertex v1 = vertices[i];
@@ -398,16 +498,34 @@ void Engine::DrawLineList(Mesh mesh) {
 void Engine::DrawLineStrip(Mesh mesh) {
 	std::vector<Vertex> vertices = mesh.Vertices();
 
-	// attention construction site here
-	for (int i = 0; i < vertices.size(); i++) {
+	for (int i = 1; i < vertices.size(); i++) {
+		Vertex v0 = vertices[i - 1];
+		Vertex v1 = vertices[i];
+
+		int2 p0 = VertexToPixel(v0, mesh.t);
+		int2 p1 = VertexToPixel(v1, mesh.t);
+
+		graphics.DrawLine(p0, p1, drawingColor);
 	}
 }
 
 void Engine::DrawTriangleList(Mesh mesh) {
 	std::vector<Vertex> vertices = mesh.Vertices();
 
-	// attention construction site here
-	for (int i = 0; i < vertices.size(); i++) {
+	for (int i = 2; i < vertices.size(); i += 3) {
+		Vertex v0 = vertices[i - 2];
+		Vertex v1 = vertices[i - 1];
+		Vertex v2 = vertices[i];
+
+		int2 p0 = VertexToPixel(v0, mesh.t);
+		int2 p1 = VertexToPixel(v1, mesh.t);
+		int2 p2 = VertexToPixel(v2, mesh.t);
+
+		ColorBlock color = drawingColor;
+		if (i < 6) color = Color::cyan;		// temporary: highlight anything on the front face to mark it and e.g. test HSD/z-buffering
+
+		if (bWireframe) graphics.DrawTriangle(p0, p1, p2, color);
+		else			graphics.FillTriangle(p0, p1, p2, color);
 	}
 }
 
@@ -419,26 +537,15 @@ void Engine::DrawTriangleStrip(Mesh mesh) {
 		Vertex v1 = vertices[i - 1];
 		Vertex v2 = vertices[i];
 
-		// To do:
-		// Fix transformation pipeline order
-		// Geometry struct needs new methods like PerspectiveTransformation and PerspectiveTransformationReverse, AspectTransformation, ..., and so on
-		// Then these methods should be called at the right moment in the pipeline, either by ToScreen or somewhere else
-		// 
-		// Otherwise the cube is going to be rendered malformed because of e.g. perspective variables being used in the wrong place
-		//
-		// To do: implement a camera class
-
-		// To do: implement z-buffering or any other hidden-surface/line-determination algorithm
-		// To do: base mesh generation on the .obj format and implement .obj format mesh loading 
-
 		int2 p0 = VertexToPixel(v0, mesh.t);
 		int2 p1 = VertexToPixel(v1, mesh.t);
 		int2 p2 = VertexToPixel(v2, mesh.t);
 
 		ColorBlock color = drawingColor;
-		if (i < 3) color = Color::cyan;		// temporary: highlight some polygon on the front face to test HSD/z-buffering
+		if (i < 3) color = Color::cyan;		// temporary
 
-		graphics.FillTriangle(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y, color);
+		if (bWireframe) graphics.DrawTriangle(p0, p1, p2, color);
+		else			graphics.FillTriangle(p0, p1, p2, color);
 	}
 }
 
