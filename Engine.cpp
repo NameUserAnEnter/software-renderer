@@ -498,18 +498,21 @@ void Engine::RenderScene() {
 	for (int i = 0; i < scene.GetMeshCount(); i++) {
 		Mesh& mesh = *scene.meshes[i];
 
-		MeshFullTransformation(mesh.vertices, mesh.GetVertexCount());
+		unsigned int cVertices = mesh.GetVertexCount();
+		Vertex* vertices = mesh.vertices;
+
+		MeshFullTransformation(vertices, cVertices);
 
 		switch (current_topology) {
-			case POINT_LIST:		DrawPointList(mesh.vertices, mesh.GetVertexCount());		break;
-			case LINE_LIST:			DrawLineList(mesh.vertices, mesh.GetVertexCount());			break;
-			case LINE_STRIP:		DrawLineStrip(mesh.vertices, mesh.GetVertexCount());		break;
-			case TRIANGLE_LIST:		DrawTriangleList(mesh.vertices, mesh.GetVertexCount());		break;
-			case TRIANGLE_STRIP:	DrawTriangleStrip(mesh.vertices, mesh.GetVertexCount());	break;
-			case UNDEFINED:			DrawPointList(mesh.vertices, mesh.GetVertexCount());		break;
+			case POINT_LIST:		DrawPointList(vertices, cVertices);		break;
+			case LINE_LIST:			DrawLineList(vertices, cVertices);		break;
+			case LINE_STRIP:		DrawLineStrip(vertices, cVertices);		break;
+			case TRIANGLE_LIST:		DrawTriangleList(vertices, cVertices);	break;
+			case TRIANGLE_STRIP:	DrawTriangleStrip(vertices, cVertices);	break;
+			case UNDEFINED:			DrawPointList(vertices, cVertices);		break;
 		}
 
-		MeshFullTransformationReverse(mesh.vertices, mesh.GetVertexCount());
+		MeshFullTransformationReverse(vertices, cVertices);
 	}
 }
 
