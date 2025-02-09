@@ -12,6 +12,8 @@ Engine::Engine() {
 
 	drawingColor	= Color::white;
 	backgroundColor = Color::dark_gray;
+
+	current_topology = TOPOLOGIES::LINE_LIST;
 }
 
 void Engine::Init(HWND hWnd) {
@@ -131,21 +133,17 @@ void Engine::InitModels() {
 	//    121                                221
 	//
 
-
-	// point list topology
-	{
-		//cube.AddVertex(v111);
-		//cube.AddVertex(v211);
-		//cube.AddVertex(v121);
-		//cube.AddVertex(v221);
-		//cube.AddVertex(v112);
-		//cube.AddVertex(v212);
-		//cube.AddVertex(v122);
-		//cube.AddVertex(v222);
+	if (current_topology == POINT_LIST) {
+		cube.AddVertex(v111);
+		cube.AddVertex(v211);
+		cube.AddVertex(v121);
+		cube.AddVertex(v221);
+		cube.AddVertex(v112);
+		cube.AddVertex(v212);
+		cube.AddVertex(v122);
+		cube.AddVertex(v222);
 	}
-
-	// line list topology
-	{
+	else if (current_topology == LINE_LIST) {
 		// front side
 		cube.AddVertex(v111);
 		cube.AddVertex(v211);
@@ -260,6 +258,12 @@ void Engine::InitModels() {
 		cube.AddVertex(v122);
 		cube.AddVertex(v121);
 	}
+	else if (current_topology == LINE_STRIP) {
+	}
+	else if (current_topology == TRIANGLE_LIST) {
+	}
+	else if (current_topology == TRIANGLE_STRIP) {
+	}
 
 	scene.Begin();
 	scene.AddMesh(cube);
@@ -276,8 +280,8 @@ void Engine::ReadUserInput() {
 
 	if (Input::Shift) delta_angle *= 5;
 
-	if (Input::Alpha[Q]) controlled.angle.y -= delta_angle;
-	if (Input::Alpha[E]) controlled.angle.y += delta_angle;
+	if (Input::Alpha[Q]) controlled.angle.y += delta_angle;
+	if (Input::Alpha[E]) controlled.angle.y -= delta_angle;
 
 	if (Input::Alpha[W]) controlled.angle.x += delta_angle;
 	if (Input::Alpha[S]) controlled.angle.x -= delta_angle;
@@ -333,10 +337,14 @@ void Engine::UpdateOutput() {
 
 void Engine::RenderScene() {
 	for (Mesh mesh : scene.meshList) {
-		// To do: prioritize a primitive topology / mesh representation that can be established from .obj format mesh data
 		// To do: implement z-buffering
 		// To do: implement culling after z-buffering
-		DrawLineList(mesh);
+
+		if (current_topology == POINT_LIST) DrawPointList(mesh);
+		else if (current_topology == LINE_LIST) DrawLineList(mesh);
+		else if (current_topology == LINE_STRIP) DrawLineStrip(mesh);
+		else if (current_topology == TRIANGLE_LIST) DrawTriangleList(mesh);
+		else if (current_topology == TRIANGLE_STRIP) DrawTriangleStrip(mesh);
 	}
 
 	// To do: add a grid plane

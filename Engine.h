@@ -68,6 +68,12 @@ private:
 
 	float3 saved_pos;
 	float3 saved_angle;
+
+	enum TOPOLOGIES {
+		POINT_LIST,
+		LINE_LIST, LINE_STRIP,
+		TRIANGLE_LIST, TRIANGLE_STRIP
+	} current_topology;
 };
 
 #endif
