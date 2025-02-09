@@ -11,8 +11,7 @@ struct Viewport {
 	float z_offset;
 	float FOV;
 
-	float fViewportWidth;
-	float fViewportHeight;
+	float2 viewportSize;
 };
 
 #endif

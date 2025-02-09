@@ -35,17 +35,27 @@ private:
 	void UpdateOutput();
 	void RenderScene();
 
-	int2 VertexToPixel(Vertex, Transformation);
-	int2 VertexToPixel(Vertex);
+	// Vertex pipeline methods, consider moving to viewport class as non-static methods
+	static void VertexAspectTransformation(float3&, float2);
+	static void VertexAspectTransformationReverse(float3&, float2);
+
+	static void VertexPerspectiveTransformation(float3&, float, float);
+	static void VertexPerspectiveTransformationReverse(float3&, float, float);
+
+	static void VertexScreenTransformation(float3&, float2);
+	static void VertexScreenTransformationReverse(float3&, float2);
+
+	void MeshFullTransformation(Vertex*, unsigned int);
+	void MeshFullTransformationReverse(Vertex*, unsigned int);
 
 	// Draw topology methods used by RenderScene()
-	void DrawPointList(Vertex*, unsigned int, Transformation);
+	void DrawPointList(Vertex*, unsigned int);
 
-	void DrawLineList(Vertex*, unsigned int, Transformation);
-	void DrawLineStrip(Vertex*, unsigned int, Transformation);
+	void DrawLineList(Vertex*, unsigned int);
+	void DrawLineStrip(Vertex*, unsigned int);
 
-	void DrawTriangleList(Vertex*, unsigned int, Transformation);
-	void DrawTriangleStrip(Vertex*, unsigned int, Transformation);
+	void DrawTriangleList(Vertex*, unsigned int);
+	void DrawTriangleStrip(Vertex*, unsigned int);
 
 public:
 	int windowX, windowY;

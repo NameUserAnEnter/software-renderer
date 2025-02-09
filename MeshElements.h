@@ -4,12 +4,10 @@
 #include "DimensionalTypes.h"
 
 struct Vertex {
-	float x, y, z;
+	float3 pos;
 
 	void operator=(float3 f) {
-		x = f.x;
-		y = f.y;
-		z = f.z;
+		pos = f;
 	}
 };
 

@@ -41,6 +41,10 @@ namespace DimensionalTypes {
 			y -= operand;
 			z -= operand;
 		}
+
+		xyz operator-() {
+			return { -x, -y, -z };
+		}
 	};
 }
 

@@ -13,7 +13,7 @@ Engine::Engine() {
 	drawingColor	= Color::white;
 	backgroundColor = Color::dark_gray;
 
-	current_topology = TOPOLOGIES::UNDEFINED;
+	current_topology = TOPOLOGIES::TRIANGLE_LIST;
 
 	bWireframe = true;
 }
@@ -31,8 +31,8 @@ void Engine::Init(HWND hWnd) {
 
 	viewport.z_offset = 1;
 	viewport.FOV = 0.06;
-	viewport.fViewportWidth = ClientRect.right;
-	viewport.fViewportHeight = ClientRect.bottom;
+	viewport.viewportSize.x = ClientRect.right;
+	viewport.viewportSize.y = ClientRect.bottom;
 
 	graphics.Init(hWindow);
 	graphics.ResizeBuffers(ClientRect.right, ClientRect.bottom);		// also calls InitializeBuffers()
@@ -48,7 +48,7 @@ void Engine::Release() {
 }
 
 void Engine::Update() {
-	//output += NumStr(viewport.fViewportWidth) + "x" + NumStr(viewport.fViewportHeight) + ", ";
+	output += NumStr(viewport.viewportSize.x) + "x" + NumStr(viewport.viewportSize.y) + ", ";
 
 	// Logic
 	ReadUserInput();
@@ -74,29 +74,31 @@ bool Engine::Done() {
 }
 
 float2 Engine::ViewportSize() {
-	return { viewport.fViewportWidth, viewport.fViewportHeight };
+	return { viewport.viewportSize.x, viewport.viewportSize.y };
 }
 
 void Engine::OnWindowResize(unsigned int uNewClientWidth, unsigned int uNewClientHeight) {
 	graphics.ResizeBuffers(uNewClientWidth, uNewClientHeight);
 
-	viewport.fViewportWidth = uNewClientWidth;
-	viewport.fViewportHeight = uNewClientHeight;
+	viewport.viewportSize.x = uNewClientWidth;
+	viewport.viewportSize.y = uNewClientHeight;
 }
 
 void Engine::InitCustomScene() {
 	InitModels();
 
 	if (scene.GetMeshCount() <= 0) return;
-	Transformation& t = scene.meshes[scene.GetMeshCount() - 1]->t;
+	Mesh& mesh = *scene.meshes[scene.GetMeshCount() - 1];
 
-	t.scale = { 0.6, 0.6, 0.6 };
-	t.pos = { 0, 0, 0 };
-	t.angle = { PI / -8, 0, 0 };
-	//t.angle = { PI / 8, PI / 6, 0 };
+	mesh.t.scale = { 0.6, 0.6, 0.6 };
+	mesh.t.pos = { 0, 0, 0 };
+	mesh.t.angle = { PI / -8, 0, 0 };
+	//t.angle = { PI / -8, PI / 6, 0 };
 
-	saved_pos = t.pos;
-	saved_angle = t.angle;
+	mesh.ApplyTransformation();
+
+	saved_pos = mesh.t.pos;
+	saved_angle = mesh.t.angle;
 }
 
 void Engine::InitModels() {
@@ -421,7 +423,8 @@ void Engine::ReadUserInput() {
 	if (Input::Esc) StopEngine();
 
 	if (scene.GetMeshCount() <= 0) return;
-	Transformation& controlled = scene.meshes[scene.GetMeshCount() - 1]->t;
+	Mesh& mesh = *scene.meshes[scene.GetMeshCount() - 1];
+	Transformation& controlled = mesh.t;
 
 	float delta_pos = 0.01;
 	float delta_scroll = 0.01;
@@ -467,17 +470,25 @@ void Engine::ReadUserInput() {
 	if (Input::Mouse[mouse_control::SCROLL_UP])		*scrollable_values[scroll_mode] += delta_scroll;
 
 	controlled.scale = { scale, scale, scale };
+	
+	//mesh.ApplyTransformation();
 }
 
 void Engine::UpdateOutput() {
 	if (scene.GetMeshCount() <= 0) return;
-	Transformation& cube = scene.meshes[scene.GetMeshCount() - 1]->t;
+	Mesh& mesh = *scene.meshes[scene.GetMeshCount() - 1];
+	Transformation& t = mesh.t;
 
-	output += "cube pos: ("		+ NumStr(cube.pos.x) + ", " + NumStr(cube.pos.y) + ", " + NumStr(cube.pos.z) + "), ";
-	output += "cube angle: ("	+ NumStr(cube.angle.x) + ", " + NumStr(cube.angle.y) + ", " + NumStr(cube.angle.z) + "), ";
-	output += "cube scale: ("	+ NumStr(cube.scale.x) + ", " + NumStr(cube.scale.y) + ", " + NumStr(cube.scale.z) + "), ";
+	output += "cube pos: ("		+ NumStr(t.pos.x) + ", " + NumStr(t.pos.y) + ", " + NumStr(t.pos.z) + "), ";
+	output += "cube angle: ("	+ NumStr(t.angle.x) + ", " + NumStr(t.angle.y) + ", " + NumStr(t.angle.z) + "), ";
+	output += "cube scale: ("	+ NumStr(t.scale.x) + ", " + NumStr(t.scale.y) + ", " + NumStr(t.scale.z) + "), ";
 	output += "z_offset: "		+ NumStr(viewport.z_offset) + ", ";
 	output += "FOV: "			+ NumStr(viewport.FOV);
+	
+	if (mesh.GetVertexCount() > 0) {
+		float3 p = mesh.vertices[0].pos;
+		output += ", first vertex: ("	+ NumStr(p.x) + ", " + NumStr(p.y) + ", " + NumStr(p.z) + ")";
+	}
 
 	SetWindowTitle(hWindow, output);
 	output = "";
@@ -486,78 +497,120 @@ void Engine::UpdateOutput() {
 void Engine::RenderScene() {
 	for (int i = 0; i < scene.GetMeshCount(); i++) {
 		Mesh& mesh = *scene.meshes[i];
+
+		MeshFullTransformation(mesh.vertices, mesh.GetVertexCount());
+
 		switch (current_topology) {
-			case POINT_LIST:		DrawPointList(mesh.vertices, mesh.GetVertexCount(), mesh.t);		break;
-			case LINE_LIST:			DrawLineList(mesh.vertices, mesh.GetVertexCount(), mesh.t);			break;
-			case LINE_STRIP:		DrawLineStrip(mesh.vertices, mesh.GetVertexCount(), mesh.t);		break;
-			case TRIANGLE_LIST:		DrawTriangleList(mesh.vertices, mesh.GetVertexCount(), mesh.t);		break;
-			case TRIANGLE_STRIP:	DrawTriangleStrip(mesh.vertices, mesh.GetVertexCount(), mesh.t);	break;
-			case UNDEFINED:			DrawPointList(mesh.vertices, mesh.GetVertexCount(), mesh.t);		break;
+			case POINT_LIST:		DrawPointList(mesh.vertices, mesh.GetVertexCount());		break;
+			case LINE_LIST:			DrawLineList(mesh.vertices, mesh.GetVertexCount());			break;
+			case LINE_STRIP:		DrawLineStrip(mesh.vertices, mesh.GetVertexCount());		break;
+			case TRIANGLE_LIST:		DrawTriangleList(mesh.vertices, mesh.GetVertexCount());		break;
+			case TRIANGLE_STRIP:	DrawTriangleStrip(mesh.vertices, mesh.GetVertexCount());	break;
+			case UNDEFINED:			DrawPointList(mesh.vertices, mesh.GetVertexCount());		break;
 		}
+
+		MeshFullTransformationReverse(mesh.vertices, mesh.GetVertexCount());
 	}
 }
 
-int2 Engine::VertexToPixel(Vertex vertex, Transformation t) {
-	float3 pos = { vertex.x, vertex.y, vertex.z };
-
-	pos = Geometry::RotateAroundAxisY(pos, t.angle.y);
-	pos = Geometry::RotateAroundAxisX(pos, t.angle.x);
-	pos = Geometry::RotateAroundAxisZ(pos, t.angle.z);
-
-	pos = Geometry::Scale(pos, t.scale);
-
-	pos= Geometry::Translate(pos, t.pos);
-
-	return viewport.ToScreen(pos);
+void Engine::VertexAspectTransformation(float3& pos, float2 viewportSize) {
+	pos.x *= (viewportSize.y / viewportSize.x);
 }
 
-int2 Engine::VertexToPixel(Vertex vertex) {
-	float3 pos = { vertex.x, vertex.y, vertex.z };
-	return viewport.ToScreen(pos);
+void Engine::VertexAspectTransformationReverse(float3& pos, float2 viewportSize) {
+	pos.x /= (viewportSize.y / viewportSize.x);
 }
 
-void Engine::DrawPointList(Vertex* vertices, unsigned int cVertices, Transformation t) {
+void Engine::VertexPerspectiveTransformation(float3& pos, float FOV, float z_offset) {
+	pos.z *= -1;
+
+	pos.x *= pos.z * FOV + z_offset;
+	pos.y *= pos.z * FOV + z_offset;
+}
+
+void Engine::VertexPerspectiveTransformationReverse(float3& pos, float FOV, float z_offset) {
+	pos.x /= pos.z * FOV + z_offset;
+	pos.y /= pos.z * FOV + z_offset;
+
+	pos.z *= -1;
+}
+
+void Engine::VertexScreenTransformation(float3& pos, float2 viewportSize) {
+	pos.x *= -(viewportSize.x / 2);
+	pos.x +=  (viewportSize.x / 2);
+
+	pos.y *= -1;
+	pos.y *= -(viewportSize.y / 2);
+	pos.y +=  (viewportSize.y / 2);
+}
+
+void Engine::VertexScreenTransformationReverse(float3& pos, float2 viewportSize) {
+	pos.x -=  (viewportSize.x / 2);
+	pos.x /= -(viewportSize.x / 2);
+
+	pos.y -=  (viewportSize.y / 2);
+	pos.y /= -(viewportSize.y / 2);
+	pos.y *= -1;
+}
+
+void Engine::MeshFullTransformation(Vertex* vertices, unsigned int cVertices) {
+	for (int i = 0; i < cVertices; i++) {
+		VertexAspectTransformation(vertices[i].pos, viewport.viewportSize);
+		VertexPerspectiveTransformation(vertices[i].pos, viewport.FOV, viewport.z_offset);
+		VertexScreenTransformation(vertices[i].pos, viewport.viewportSize);
+	}
+}
+
+void Engine::MeshFullTransformationReverse(Vertex* vertices, unsigned int cVertices) {
+	for (int i = 0; i < cVertices; i++) {
+		VertexScreenTransformationReverse(vertices[i].pos, viewport.viewportSize);
+		VertexPerspectiveTransformationReverse(vertices[i].pos, viewport.FOV, viewport.z_offset);
+		VertexAspectTransformationReverse(vertices[i].pos, viewport.viewportSize);
+	}
+}
+
+void Engine::DrawPointList(Vertex* vertices, unsigned int cVertices) {
 	for (int i = 0; i < cVertices; i++) {
 		Vertex& v = vertices[i];
-		int2 p = VertexToPixel(v, t);
+		int2 p = { v.pos.x, v.pos.y };
 
 		graphics.DrawPoint(p, drawingColor);
 	}
 }
 
-void Engine::DrawLineList(Vertex* vertices, unsigned int cVertices, Transformation t) {
+void Engine::DrawLineList(Vertex* vertices, unsigned int cVertices) {
 	for (int i = 1; i < cVertices; i += 2) {
 		Vertex& v0 = vertices[i - 1];
 		Vertex& v1 = vertices[i];
 
-		int2 p0 = VertexToPixel(v0, t);
-		int2 p1 = VertexToPixel(v1, t);
+		int2 p0 = { v0.pos.x, v0.pos.y };
+		int2 p1 = { v1.pos.x, v1.pos.y };
 
 		graphics.DrawLine(p0, p1, drawingColor);
 	}
 }
 
-void Engine::DrawLineStrip(Vertex* vertices, unsigned int cVertices, Transformation t) {
+void Engine::DrawLineStrip(Vertex* vertices, unsigned int cVertices) {
 	for (int i = 1; i < cVertices; i++) {
 		Vertex& v0 = vertices[i - 1];
 		Vertex& v1 = vertices[i];
 
-		int2 p0 = VertexToPixel(v0, t);
-		int2 p1 = VertexToPixel(v1, t);
+		int2 p0 = { v0.pos.x, v0.pos.y };
+		int2 p1 = { v1.pos.x, v1.pos.y };
 
 		graphics.DrawLine(p0, p1, drawingColor);
 	}
 }
 
-void Engine::DrawTriangleList(Vertex* vertices, unsigned int cVertices, Transformation t) {
+void Engine::DrawTriangleList(Vertex* vertices, unsigned int cVertices) {
 	for (int i = 2; i < cVertices; i += 3) {
 		Vertex& v0 = vertices[i - 2];
 		Vertex& v1 = vertices[i - 1];
 		Vertex& v2 = vertices[i];
 
-		int2 p0 = VertexToPixel(v0, t);
-		int2 p1 = VertexToPixel(v1, t);
-		int2 p2 = VertexToPixel(v2, t);
+		int2 p0 = { v0.pos.x, v0.pos.y };
+		int2 p1 = { v1.pos.x, v1.pos.y };
+		int2 p2 = { v2.pos.x, v2.pos.y };
 
 		ColorBlock color = drawingColor;
 		if (i < 6) color = Color::cyan;		// temporary: highlight anything on the front face to mark it and e.g. test HSD/z-buffering
@@ -567,15 +620,15 @@ void Engine::DrawTriangleList(Vertex* vertices, unsigned int cVertices, Transfor
 	}
 }
 
-void Engine::DrawTriangleStrip(Vertex* vertices, unsigned int cVertices, Transformation t) {
+void Engine::DrawTriangleStrip(Vertex* vertices, unsigned int cVertices) {
 	for (int i = 2; i < cVertices; i++) {
 		Vertex& v0 = vertices[i - 2];
 		Vertex& v1 = vertices[i - 1];
 		Vertex& v2 = vertices[i];
 
-		int2 p0 = VertexToPixel(v0, t);
-		int2 p1 = VertexToPixel(v1, t);
-		int2 p2 = VertexToPixel(v2, t);
+		int2 p0 = { v0.pos.x, v0.pos.y };
+		int2 p1 = { v1.pos.x, v1.pos.y };
+		int2 p2 = { v2.pos.x, v2.pos.y };
 
 		ColorBlock color = drawingColor;
 		if (i < 3) color = Color::cyan;		// temporary
@@ -618,4 +671,8 @@ void Engine::DrawTriangleStrip(Vertex* vertices, unsigned int cVertices, Transfo
 
 // --- Move from vectors to pointer arrays, especially in mesh vertex buffers etc.
 // Copying vectors passed as function parameters will decrease performance, instead pass the pointer with array size and operate on data in the array directly
+
+// To do: Implement an option to set one of two types of a vertex pipeline
+// - a two-way vertex pipeline with reverse methods using twice the processing power
+// - a one-way vertex pipeline without reverse methods using twice the memory to store the computed vertiex coordinates outside of the original buffer
 

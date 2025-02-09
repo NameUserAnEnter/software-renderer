@@ -9,12 +9,11 @@ int2 Viewport::ToScreen(float3 world) {
 	//screen.x = world.x * (uViewportWidth / 2.f) + uViewportWidth / 2.f;
 	//screen.y = world.y * (uViewportHeight / 2.f) + uViewportHeight /2.f;
 
-	world.x *= (fViewportHeight / fViewportWidth);
+	world.x *= (viewportSize.y / viewportSize.x);
 	world.z *= -1;
 
-	screen.x = (world.x * (world.z * FOV + z_offset)) * (fViewportWidth / 2.f) + fViewportWidth / 2.f;
-	screen.y = (world.y * (world.z * FOV + z_offset)) * (fViewportHeight / 2.f * -1) + fViewportHeight /2.f;
-
+	screen.x = (world.x * (world.z * FOV + z_offset)) * (viewportSize.x / 2) + viewportSize.x / 2;
+	screen.y = (world.y * (world.z * FOV + z_offset)) * (viewportSize.y / 2 * -1) + viewportSize.y /2;
 
 	return screen;
 }

@@ -38,13 +38,13 @@ void Mesh::ApplyTransformation() {
 	for (int i = 0; i < cVertices; i++) {
 		Vertex& vertex = vertices[i];
 
-		vertex = Geometry::RotateAroundAxisY({ vertex.x, vertex.y, vertex.z }, t.angle.y);
-		vertex = Geometry::RotateAroundAxisX({ vertex.x, vertex.y, vertex.z }, t.angle.x);
-		vertex = Geometry::RotateAroundAxisZ({ vertex.x, vertex.y, vertex.z }, t.angle.z);
+		Geometry::RotateAroundAxisY(vertex.pos, t.angle.y);
+		Geometry::RotateAroundAxisX(vertex.pos, t.angle.x);
+		Geometry::RotateAroundAxisZ(vertex.pos, t.angle.z);
 
-		vertex = Geometry::Scale({ vertex.x, vertex.y, vertex.z }, t.scale);
+		Geometry::Scale(vertex.pos, t.scale);
 
-		vertex = Geometry::Translate({ vertex.x, vertex.y, vertex.z }, t.pos);
+		Geometry::Translate(vertex.pos, t.pos);
 	}
 
 	t.pos = { 0, 0, 0 };

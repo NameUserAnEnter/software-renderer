@@ -4,26 +4,6 @@
 #include <windows.h>
 #include <string>
 
-inline void Popup(std::string message) {
-	MessageBoxA(NULL, message.c_str(), "", MB_OK);
-}
-
-inline void Popup(unsigned int num) {
-	Popup(std::to_string(num));
-}
-
-inline void Popup() {
-	Popup("");
-}
-
-inline void Popup(float num) {
-	Popup(std::to_string(num));
-}
-
-inline void SetWindowTitle(HWND hWindow, std::string title) {
-	SetWindowTextA(hWindow, title.c_str());
-}
-
 inline bool StrContains(std::string str, char c) {
 	for (char current : str) {
 		if (current == c) return true;
@@ -48,6 +28,22 @@ inline std::string NumStr(float num) {
 	}
 
 	return str;
+}
+
+inline void Popup(std::string message) {
+	MessageBoxA(NULL, message.c_str(), "", MB_OK);
+}
+
+inline void Popup(float num) {
+	Popup(NumStr(num));
+}
+
+inline void Popup() {
+	Popup("");
+}
+
+inline void SetWindowTitle(HWND hWindow, std::string title) {
+	SetWindowTextA(hWindow, title.c_str());
 }
 
 #endif

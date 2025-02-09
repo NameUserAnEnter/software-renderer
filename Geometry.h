@@ -8,17 +8,17 @@
 #include <math.h>
 
 struct Geometry {
-	static float3 Translate(float3, float3);
+	static void Translate(float3&, float3);
 
-	static float3 Scale(float3, float3);
-	static float3 Scale(float3, float);
-	static float3 ScaleX(float3, float);
-	static float3 ScaleY(float3, float);
-	static float3 ScaleZ(float3, float);
+	static void Scale(float3&, float3);
+	static void Scale(float3&, float);
+	static void ScaleX(float3&, float);
+	static void ScaleY(float3&, float);
+	static void ScaleZ(float3&, float);
 
-	static float3 RotateAroundAxisX(float3, float);
-	static float3 RotateAroundAxisY(float3, float);
-	static float3 RotateAroundAxisZ(float3, float);
+	static void RotateAroundAxisX(float3&, float);
+	static void RotateAroundAxisY(float3&, float);
+	static void RotateAroundAxisZ(float3&, float);
 };
 
 #endif
