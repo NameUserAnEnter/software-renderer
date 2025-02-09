@@ -13,7 +13,7 @@ Engine::Engine() {
 	drawingColor	= Color::white;
 	backgroundColor = Color::dark_gray;
 
-	current_topology = TOPOLOGIES::TRIANGLE_LIST;
+	current_topology = TOPOLOGIES::UNDEFINED;
 
 	bWireframe = true;
 }
@@ -349,6 +349,69 @@ void Engine::InitModels() {
 
 		// incomplete...
 	}
+	else if (current_topology == UNDEFINED) {
+		// data based on data/cube4.obj, interpreting data as LHS, no x-axis inversion
+
+		// v 1.000000 1.000000 -1.000000
+		cube.AddVertex({  1,  1, -1 });
+
+		// v 1.000000 -1.000000 -1.000000
+		cube.AddVertex({  1, -1, -1 });
+
+		// v 1.000000 1.000000 1.000000
+		cube.AddVertex({  1,  1,  1 });
+
+		// v 1.000000 -1.000000 1.000000
+		cube.AddVertex({  1, -1,  1 });
+
+		// v -1.000000 1.000000 -1.000000
+		cube.AddVertex({ -1,  1, -1 });
+
+		// v -1.000000 -1.000000 -1.000000
+		cube.AddVertex({ -1, -1, -1 });
+
+		// v -1.000000 1.000000 1.000000
+		cube.AddVertex({ -1,  1,  1 });
+
+		// v -1.000000 -1.000000 1.000000
+		cube.AddVertex({ -1, -1,  1 });
+
+		// top side
+		// f 1 5 7 3
+		// 7 -- 3
+		// |    |
+		// 5 -- 1
+
+		// back side
+		// f 4 3 7 8
+		// 7 -- 3
+		// |    |
+		// 8 -- 4
+
+		// left side
+		// f 8 7 5 6
+		// 7 -- 5
+		// |    |
+		// 8 -- 6
+
+		// bottom side
+		// f 6 2 4 8
+		// 6 -- 2
+		// |    |
+		// 8 -- 4
+
+		// right side
+		// f 2 1 3 4
+		// 1 -- 3
+		// |    |
+		// 2 -- 4
+
+		// front side
+		// f 6 5 1 2
+		// 5 -- 1
+		// |    |
+		// 6 -- 2
+	}
 
 	scene.Begin();
 	scene.AddMesh(cube);
@@ -426,6 +489,7 @@ void Engine::RenderScene() {
 			case LINE_STRIP:		DrawLineStrip(mesh);		break;
 			case TRIANGLE_LIST:		DrawTriangleList(mesh);		break;
 			case TRIANGLE_STRIP:	DrawTriangleStrip(mesh);	break;
+			case UNDEFINED:			DrawPointList(mesh);		break;
 		}
 	}
 }

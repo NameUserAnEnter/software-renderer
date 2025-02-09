@@ -72,7 +72,8 @@ private:
 	enum TOPOLOGIES {
 		POINT_LIST,
 		LINE_LIST, LINE_STRIP,
-		TRIANGLE_LIST, TRIANGLE_STRIP
+		TRIANGLE_LIST, TRIANGLE_STRIP,
+		UNDEFINED
 	} current_topology;
 
 	bool bWireframe;		// has impact only on triangle topologies

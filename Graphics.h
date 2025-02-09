@@ -10,6 +10,9 @@
 
 class Graphics {
 public:
+	Graphics();
+	~Graphics();
+
 	void Init(HWND hWindow);
 
 	void InitializeBuffers();

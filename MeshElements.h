@@ -2,7 +2,6 @@
 #define MESHELEMENTS_H
 
 #include "DimensionalTypes.h"
-#include <vector>
 
 struct Vertex {
 	float x, y, z;
@@ -12,15 +11,6 @@ struct Vertex {
 		y = f.y;
 		z = f.z;
 	}
-};
-
-struct Edge {
-	Vertex& a;
-	Vertex& b;
-};
-
-struct Face {
-	Edge* edges;
 };
 
 #endif

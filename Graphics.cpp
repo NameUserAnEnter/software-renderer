@@ -1,5 +1,16 @@
 #include "graphics.h"
 
+Graphics::Graphics() {
+	backbuffer_bytes = nullptr;
+}
+
+Graphics::~Graphics() {
+	if (backbuffer_bytes != nullptr) {
+		free(backbuffer_bytes);
+		backbuffer_bytes = nullptr;
+	}
+}
+
 void Graphics::Init(HWND hWindow) {
 	this->hWindow = hWindow;
 
@@ -40,6 +51,7 @@ void Graphics::InitializeBuffers() {
 void Graphics::ReleaseBuffers() {
 	if (backbuffer_bytes != nullptr) {
 		free(backbuffer_bytes);
+		backbuffer_bytes = nullptr;
 	}
 
 	DeleteObject(cleanbuffer_bitmap);
