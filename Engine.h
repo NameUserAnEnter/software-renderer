@@ -2,11 +2,13 @@
 #define ENGINE_H
 
 #include "Graphics.h"
+#include "MeshElements.h"
+#include "Mesh.h"
 #include "Scene.h"
-#include "Input.h"
 #include "Geometry.h"
 #include "Viewport.h"
 #include "ColorDefs.h"
+#include "Input.h"
 #include "utils.h"
 
 class Engine {
@@ -37,13 +39,13 @@ private:
 	int2 VertexToPixel(Vertex);
 
 	// Draw topology methods used by RenderScene()
-	void DrawPointList(Mesh);
+	void DrawPointList(Vertex*, unsigned int, Transformation);
 
-	void DrawLineList(Mesh);
-	void DrawLineStrip(Mesh);
+	void DrawLineList(Vertex*, unsigned int, Transformation);
+	void DrawLineStrip(Vertex*, unsigned int, Transformation);
 
-	void DrawTriangleList(Mesh);
-	void DrawTriangleStrip(Mesh);
+	void DrawTriangleList(Vertex*, unsigned int, Transformation);
+	void DrawTriangleStrip(Vertex*, unsigned int, Transformation);
 
 public:
 	int windowX, windowY;

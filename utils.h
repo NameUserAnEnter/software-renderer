@@ -4,16 +4,20 @@
 #include <windows.h>
 #include <string>
 
-inline void PopupMessage(std::string message) {
+inline void Popup(std::string message) {
 	MessageBoxA(NULL, message.c_str(), "", MB_OK);
 }
 
-inline void PopupMessage(unsigned int num) {
-	PopupMessage(std::to_string(num));
+inline void Popup(unsigned int num) {
+	Popup(std::to_string(num));
 }
 
-inline void PopupMessage(float num) {
-	PopupMessage(std::to_string(num));
+inline void Popup() {
+	Popup("");
+}
+
+inline void Popup(float num) {
+	Popup(std::to_string(num));
 }
 
 inline void SetWindowTitle(HWND hWindow, std::string title) {

@@ -4,21 +4,40 @@ Mesh::Mesh() {
 	t.pos = { 0, 0, 0 };
 	t.angle = { 0, 0, 0 };
 	t.scale = { 1, 1, 1 };
+
+	vertices = (Vertex*) calloc(0, sizeof(Vertex));
+	cVertices = 0;
+}
+
+Mesh::~Mesh() {
+	Release();
 }
 
 void Mesh::Release() {
+	free(vertices);
+
+	vertices = nullptr;
+	cVertices = 0;
 }
 
-void Mesh::AddVertex(Vertex point) {
-	vertices.push_back(point);
+void Mesh::AddVertex(Vertex vertex) {
+	Vertex* new_ptr = (Vertex*) realloc(vertices, (size_t) (sizeof(Vertex) * (cVertices + 1)));
+	if (new_ptr == nullptr) return;
+
+	vertices = new_ptr;
+	cVertices = cVertices + 1;
+
+	vertices[cVertices - 1] = vertex;
 }
 
-std::vector<Vertex> Mesh::Vertices() {
-	return vertices;
+unsigned int Mesh::GetVertexCount() {
+	return cVertices;
 }
 
 void Mesh::ApplyTransformation() {
-	for (auto& vertex : vertices) {
+	for (int i = 0; i < cVertices; i++) {
+		Vertex& vertex = vertices[i];
+
 		vertex = Geometry::RotateAroundAxisY({ vertex.x, vertex.y, vertex.z }, t.angle.y);
 		vertex = Geometry::RotateAroundAxisX({ vertex.x, vertex.y, vertex.z }, t.angle.x);
 		vertex = Geometry::RotateAroundAxisZ({ vertex.x, vertex.y, vertex.z }, t.angle.z);

@@ -6,13 +6,22 @@
 
 class Scene {
 public:
+	Scene();
+	~Scene();
+
 	void Begin();
 	void End();
 
-	void AddMesh(Mesh);
+	void AddMesh();
+	unsigned int GetMeshCount();
+
+	//Mesh& GetMesh(unsigned int);
 
 public:
-	std::vector<Mesh> meshList;
+	Mesh** meshes;
+
+private:
+	unsigned int cMeshes;
 };
 
 #endif

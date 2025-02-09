@@ -9,18 +9,22 @@
 class Mesh {
 public:
 	Mesh();
+	~Mesh();
+
 	void Release();
 
 	void AddVertex(Vertex);
-	std::vector<Vertex> Vertices();
+	unsigned int GetVertexCount();
 
 	void ApplyTransformation();
 
 public:
+	Vertex* vertices;
+
 	Transformation t;
 
 private:
-	std::vector<Vertex> vertices;
+	unsigned int cVertices;
 };
 
 #endif
