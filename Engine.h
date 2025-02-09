@@ -36,6 +36,15 @@ private:
 	int2 VertexToPixel(Vertex, Transformation);
 	int2 VertexToPixel(Vertex);
 
+	// Draw topology methods used by RenderScene()
+	void DrawPointList(Mesh);
+
+	void DrawLineList(Mesh);
+	void DrawLineStrip(Mesh);
+
+	void DrawTriangleList(Mesh);
+	void DrawTriangleStrip(Mesh);
+
 public:
 	int windowX, windowY;
 

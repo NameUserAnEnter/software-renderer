@@ -86,12 +86,15 @@ void Graphics::DrawPixel(int2 pos, ColorBlock color) {
 
 void Graphics::DrawPoint(int x, int y, ColorBlock color) {
 	HPEN backbuffer_pen = CreatePen(PS_SOLID, raster_unit_thickness, RGB(color.R, color.G, color.B));
-	HGDIOBJ original_obj = SelectObject(backbuffer_dc, backbuffer_pen);
+	HGDIOBJ original_pen = SelectObject(backbuffer_dc, backbuffer_pen);
 
 	MoveToEx(backbuffer_dc, x, y, NULL);
-	LineTo(backbuffer_dc, 1, 1);
+	LineTo(backbuffer_dc, x + 1, y);
+	LineTo(backbuffer_dc, x + 1, y + 1);
+	LineTo(backbuffer_dc, x,     y + 1);
+	LineTo(backbuffer_dc, x,     y);
 
-	SelectObject(backbuffer_dc, original_obj);
+	SelectObject(backbuffer_dc, original_pen);
 	DeleteObject(backbuffer_pen);
 }
 

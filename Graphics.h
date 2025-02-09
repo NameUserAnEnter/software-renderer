@@ -48,6 +48,8 @@ public:
 	void ClearBackBuffer();
 	void UpdateFrontBuffer();
 
+	// To do: performance consideration; implement buffer swapping / swap chain by using a pointer, instead of performing bit block transfers to the front buffer
+
 	void ResizeBuffers(int width, int height);
 
 	bool SetRasterUnitThickness(unsigned int);

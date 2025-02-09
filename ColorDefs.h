@@ -17,6 +17,8 @@ namespace Color {
 
 	static const ColorBlock purple		= { 170, 0, 255 };
 	static const ColorBlock dark_purple	= {  30, 0,  90 };
+
+	static const ColorBlock dark_gray = { 30, 30, 30 };
 };
 
 #endif
