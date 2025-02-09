@@ -11,8 +11,6 @@ public:
 	Mesh();
 	void Release();
 
-	// To do: Decide on a mesh representation or implement more than one
-
 	void AddVertex(Vertex);
 	std::vector<Vertex> Vertices();
 
