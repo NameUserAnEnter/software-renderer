@@ -35,7 +35,7 @@ private:
 	void UpdateOutput();
 	void RenderScene();
 
-	void MeshToScreen(Vertex*, unsigned int);
+	void VerticesToScreen(Vertex*, unsigned int);
 
 	// Draw topology methods used by RenderScene()
 	void DrawPointList(Vertex*, unsigned int);
@@ -45,6 +45,8 @@ private:
 
 	void DrawTriangleList(Vertex*, unsigned int);
 	void DrawTriangleStrip(Vertex*, unsigned int);
+
+	void DrawQuadList(Vertex*, unsigned int);
 
 public:
 	int windowX, windowY;
@@ -74,10 +76,11 @@ private:
 		POINT_LIST,
 		LINE_LIST, LINE_STRIP,
 		TRIANGLE_LIST, TRIANGLE_STRIP,
-		UNDEFINED
+		QUAD_LIST,
+		UNDEFINED, UNDEFINED2
 	} current_topology;
 
-	bool bWireframe;		// has impact only on triangle topologies
+	bool bWireframe;		// has impact only on polygonal topologies
 };
 
 #endif

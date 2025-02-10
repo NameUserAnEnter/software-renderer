@@ -11,5 +11,9 @@ struct Vertex {
 	}
 };
 
+//struct Face {
+//	Vertex* v;
+//};
+
 #endif
 
