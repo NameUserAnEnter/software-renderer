@@ -26,6 +26,7 @@ public:
 	unsigned int GetVertexCount();
 
 	void ApplyTransformation();
+	void ApplyTransformationOnOutputBuffer();
 
 	void LoadWavefrontObj(std::wstring);
 

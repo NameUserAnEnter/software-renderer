@@ -9,6 +9,7 @@
 #include "Viewport.h"
 #include "ColorDefs.h"
 #include "Input.h"
+#include "Clock.h"
 #include "utils.h"
 
 class Engine {
@@ -32,10 +33,13 @@ private:
 	void InitModels();
 
 	void ReadUserInput();
+
 	void UpdateOutput();
+
 	void RenderScene();
 
 	void VerticesToScreen(Vertex*, unsigned int);
+	void VerticesToScreenReverse(Vertex*, unsigned int);
 
 	// Draw topology methods used by RenderScene()
 	void DrawPointList(Vertex*, unsigned int);
@@ -73,6 +77,7 @@ private:
 	float3 saved_angle;
 
 	bool bWireframe;		// has impact only on polygonal topologies
+	bool bRenderBuffered;	// switch between buffered rendering relying on the output buffer in Mesh, or a two-way method using reverse transformations
 };
 
 #endif

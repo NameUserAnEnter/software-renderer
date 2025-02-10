@@ -48,6 +48,24 @@ unsigned int Mesh::GetVertexCount() {
 
 void Mesh::ApplyTransformation() {
 	for (int i = 0; i < cVertices; i++) {
+		Vertex& vertex = vertices[i];
+
+		Geometry::RotateAroundAxisY(vertex.pos, t.angle.y);
+		Geometry::RotateAroundAxisX(vertex.pos, t.angle.x);
+		Geometry::RotateAroundAxisZ(vertex.pos, t.angle.z);
+
+		Geometry::Scale(vertex.pos, t.scale);
+
+		Geometry::Translate(vertex.pos, t.pos);
+	}
+
+	t.pos = { 0, 0, 0 };
+	t.angle = { 0, 0, 0 };
+	t.scale = { 1, 1, 1 };
+}
+
+void Mesh::ApplyTransformationOnOutputBuffer() {
+	for (int i = 0; i < cVertices; i++) {
 		outputBuffer[i] = vertices[i];
 		Vertex& vertex = outputBuffer[i];
 

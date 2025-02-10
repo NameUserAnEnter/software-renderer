@@ -14,6 +14,7 @@ Engine::Engine() {
 	backgroundColor = Color::dark_gray;
 
 	bWireframe = true;
+	bRenderBuffered = true;
 }
 
 void Engine::Init(HWND hWnd) {
@@ -50,7 +51,10 @@ void Engine::Update() {
 
 	// Logic
 	ReadUserInput();
-	Input::UpdateInputs();
+
+	Clock::TimeUpdate();
+	Input::UpdateInputs();	// resets some inputs to a non-activated state, needs to be called after the input is read
+
 	UpdateOutput();
 
 	// Clear backbuffer
@@ -83,18 +87,20 @@ void Engine::OnWindowResize(unsigned int uNewClientWidth, unsigned int uNewClien
 }
 
 void Engine::InitCustomScene() {
+	SetWindowTitle(hWindow, "Initializing scene...");
+
 	//InitModels();
+
 	scene.AddMesh();
-	//LoadWavefrontObj(*scene.meshes[scene.GetMeshCount() - 1], L"data/cube4.obj");
-	//LoadWavefrontObj(*scene.meshes[scene.GetMeshCount() - 1], L"data/torus1.obj");
+	//scene.meshes[scene.GetMeshCount() -1]->LoadWavefrontObj(L"data/cube4.obj");
 	scene.meshes[scene.GetMeshCount() -1]->LoadWavefrontObj(L"data/car1-filtered2.obj");
 
 	if (scene.GetMeshCount() <= 0) return;
 	Mesh& mesh = *scene.meshes[scene.GetMeshCount() - 1];
 
 	mesh.t.scale = { 0.6, 0.6, 0.6 };
-	mesh.t.pos = { 0, 0, 0 };
-	mesh.t.angle = { PI / -8, 0, 0 };
+	mesh.t.pos = { 0, -0.6, 0 };
+	mesh.t.angle = { 0, PI / -2.4, 0 };
 	//t.angle = { PI / -8, PI / 6, 0 };
 
 	saved_pos = mesh.t.pos;
@@ -140,9 +146,9 @@ void Engine::InitModels() {
 	//    121                                221
 	//
 
-	MESH_TOPOLOGY current_topology = QUAD_LIST;
+	cube.topology = QUAD_LIST;
 
-	if (current_topology == POINT_LIST) {
+	if (cube.topology == POINT_LIST) {
 		cube.AddVertex(v111);
 		cube.AddVertex(v211);
 		cube.AddVertex(v121);
@@ -152,7 +158,7 @@ void Engine::InitModels() {
 		cube.AddVertex(v122);
 		cube.AddVertex(v222);
 	}
-	else if (current_topology == LINE_LIST) {
+	else if (cube.topology == LINE_LIST) {
 		// front side
 		cube.AddVertex(v111);
 		cube.AddVertex(v211);
@@ -267,7 +273,7 @@ void Engine::InitModels() {
 		cube.AddVertex(v122);
 		cube.AddVertex(v121);
 	}
-	else if (current_topology == LINE_STRIP) {
+	else if (cube.topology == LINE_STRIP) {
 		// front side
 		cube.AddVertex(v111);
 		cube.AddVertex(v211);
@@ -279,7 +285,7 @@ void Engine::InitModels() {
 
 		// to be continued, figured out, changed, fixed, or left undone
 	}
-	else if (current_topology == TRIANGLE_LIST) {
+	else if (cube.topology == TRIANGLE_LIST) {
 		// front side
 		cube.AddVertex(v111);
 		cube.AddVertex(v211);
@@ -334,7 +340,7 @@ void Engine::InitModels() {
 		cube.AddVertex(v222);
 		cube.AddVertex(v122);
 	}
-	else if (current_topology == TRIANGLE_STRIP) {
+	else if (cube.topology == TRIANGLE_STRIP) {
 		// front side
 		cube.AddVertex(v211);
 		cube.AddVertex(v221);
@@ -356,7 +362,7 @@ void Engine::InitModels() {
 
 		// incomplete...
 	}
-	else if (current_topology == QUAD_LIST) {
+	else if (cube.topology == QUAD_LIST) {
 		//v 1.000000 1.000000 -1.000000
 		//v 1.000000 -1.000000 -1.000000
 		//v 1.000000 1.000000 1.000000
@@ -405,18 +411,19 @@ void Engine::ReadUserInput() {
 	float delta_angle = (PI / 4) * 0.01;
 
 	if (Input::Shift) delta_angle *= 5;
+	if (Input::Shift) delta_pos *= 5;
 
 	if (Input::Alpha[Q]) controlled.angle.y += delta_angle;
 	if (Input::Alpha[E]) controlled.angle.y -= delta_angle;
 
-	if (Input::Alpha[W]) controlled.angle.x += delta_angle;
-	if (Input::Alpha[S]) controlled.angle.x -= delta_angle;
+	if (Input::Arrow[UP]) controlled.angle.x += delta_angle;
+	if (Input::Arrow[DOWN]) controlled.angle.x -= delta_angle;
 
-	//if (Input::Alpha[W]) controlled.pos.z += delta_pos;
-	//if (Input::Alpha[S]) controlled.pos.z -= delta_pos;
+	if (Input::Arrow[LEFT]) controlled.pos.z += delta_pos;
+	if (Input::Arrow[RIGHT]) controlled.pos.z -= delta_pos;
 
-	//if (Input::Alpha[W]) controlled.pos.y += delta_pos;
-	//if (Input::Alpha[S]) controlled.pos.y -= delta_pos;
+	if (Input::Alpha[W]) controlled.pos.y += delta_pos;
+	if (Input::Alpha[S]) controlled.pos.y -= delta_pos;
 
 	if (Input::Alpha[A]) controlled.pos.x -= delta_pos;
 	if (Input::Alpha[D]) controlled.pos.x += delta_pos;
@@ -470,8 +477,10 @@ void Engine::UpdateOutput() {
 	
 	if (mesh.GetVertexCount() > 0) {
 		float3 p = mesh.vertices[0].pos;
-		output += ", vertex0: ("	+ NumStr(p.x) + ", " + NumStr(p.y) + ", " + NumStr(p.z) + ")";
+		output += ", vertex0: ("	+ NumStr(p.x) + ", " + NumStr(p.y) + ", " + NumStr(p.z) + "), ";
 	}
+
+	output += "Framerate: " + NumStr(Clock::updates_in_last_sec);
 
 	SetWindowTitle(hWindow, output);
 	output = "";
@@ -480,11 +489,19 @@ void Engine::UpdateOutput() {
 void Engine::RenderScene() {
 	for (int i = 0; i < scene.GetMeshCount(); i++) {
 		Mesh& mesh = *scene.meshes[i];
-		mesh.ApplyTransformation();
 
-		Vertex* vertices = mesh.outputBuffer;
+		Vertex* vertices;
+		if (bRenderBuffered) {
+			mesh.ApplyTransformationOnOutputBuffer();
+			vertices = mesh.outputBuffer;
+		}
+		else {
+			// applying transformation on mesh is currently non-reversible, so non-buffered rendering is left in code only to test potential performance gain
+			//mesh.ApplyTransformation();
+			vertices = mesh.vertices;
+		}
+
 		unsigned int cVertices = mesh.GetVertexCount();
-
 		VerticesToScreen(vertices, cVertices);
 
 		switch (mesh.topology) {
@@ -495,6 +512,8 @@ void Engine::RenderScene() {
 			case TRIANGLE_STRIP:	DrawTriangleStrip(vertices, cVertices);	break;
 			case QUAD_LIST:			DrawQuadList(vertices, cVertices);		break;
 		}
+
+		if (!bRenderBuffered) VerticesToScreenReverse(vertices, cVertices);
 	}
 }
 
@@ -503,6 +522,14 @@ void Engine::VerticesToScreen(Vertex* vertices, unsigned int cVertices) {
 		viewport.VertexAspectTransformation(vertices[i].pos);
 		viewport.VertexPerspectiveTransformation(vertices[i].pos);
 		viewport.VertexScreenTransformation(vertices[i].pos);
+	}
+}
+
+void Engine::VerticesToScreenReverse(Vertex* vertices, unsigned int cVertices) {
+	for (int i = 0; i < cVertices; i++) {
+		viewport.VertexScreenTransformationReverse(vertices[i].pos);
+		viewport.VertexPerspectiveTransformationReverse(vertices[i].pos);
+		viewport.VertexAspectTransformationReverse(vertices[i].pos);
 	}
 }
 
