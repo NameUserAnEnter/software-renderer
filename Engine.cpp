@@ -60,10 +60,10 @@ void Engine::Update() {
 	// Clear backbuffer
 	graphics.ClearBackBuffer();
 
-	// Render geometry
+	// Render scene geometry
 	RenderScene();
 
-	// Swap buffers
+	// Present the scene
 	graphics.UpdateFrontBuffer();
 }
 
@@ -624,39 +624,16 @@ void Engine::DrawQuadList(Vertex* vertices, unsigned int cVertices) {
 
 // To do:
 // --- Use project13 text rendering
-// --- Implement temporary buttons and sliders to facilitate fine-tuning and tweaking some values like
-// FOV, z_offset, scroll mode, wireframe switch and transformations
-// 
+// --- Implement buttons and sliders to tweak some values like FOV, z_offset, scroll mode, wireframe switch and transformations
 // --- Implement a near and far clipping plane and/or
 // change the perspective equations so that points would collapse at the center after reaching some distance
-// rather than allowing those points to go past that center point and appear as zoomed-in again
-
-// --- Inspect the formulas in ToWorld and make sure they get exact with x and y
- 
-// --- Fix transformation pipeline order
-// Geometry struct needs new methods like PerspectiveTransformation and PerspectiveTransformationReverse, AspectTransformation, ..., and so on
-// Then these methods should be called at the right moment in the pipeline, either by ToScreen or somewhere else
-// 
-// Otherwise the cube is going to be rendered malformed because of e.g. perspective variables being used in the wrong place
-
+// rather than allowing those points to go past that center point and appear flipped as zoomed-in again
 // --- Implement a camera class
-
-// --- Implement z-buffering or any other hidden-surface/line-determination algorithm
-// --- Base mesh generation on the .obj format and implement .obj format mesh loading
-
+// --- Implement camera transformations
 // --- Add a grid plane to the scene
-
 // --- Performance consideration; implement buffer swapping / swap chain by using a pointer, instead of performing bit block transfers to the front buffer
-
-// --- Implement z-buffering
+// --- Implement z-buffering or optionally some other hidden surface/line determination algorithm
 // --- Implement culling after z-buffering, so that it doesn't get in the way
-
 // --- Implement a flexible vertex format; e.g. color, normals, texture coordinates, etc. in the vertex mesh element structure
-
-// --- Move from vectors to pointer arrays, especially in mesh vertex buffers etc.
-// Copying vectors passed as function parameters will decrease performance, instead pass the pointer with array size and operate on data in the array directly
-
-// To do: Implement an option to set one of two types of a vertex pipeline
-// - a two-way vertex pipeline with reverse methods using twice the processing power
-// - a one-way vertex pipeline without reverse methods using twice the memory to store the computed vertiex coordinates outside of the original buffer
+// --- Implement scene vertex, face, polygon counters
 
