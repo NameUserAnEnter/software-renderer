@@ -450,6 +450,14 @@ void Engine::ReadUserInput() {
 		controlled.angle = saved_angle;
 	}
 
+	// this kind of construction makes sure the action is performed only once per keypress
+	static bool keystate_k = false;
+	if (Input::Alpha[K]) {
+		if (!keystate_k) bWireframe = !bWireframe;
+		keystate_k = true;
+	}
+	else keystate_k = false;
+
 	static float scale = controlled.scale.z;
 
 	std::vector<float*> scrollable_values;
