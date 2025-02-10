@@ -61,3 +61,83 @@ void Mesh::ApplyTransformation() {
 	}
 }
 
+void Mesh::LoadWavefrontObj(std::wstring filepath) {
+	std::vector<std::string> lines = SplitByChar(GetFileData(filepath.c_str()), '\n');
+
+	std::vector<Vertex> vertices;
+	std::vector<Face> faces;
+
+	for (auto line : lines) {
+		if (line.empty()) continue;
+
+		if (line[0] == 'v') {						// if line starts with a 'v'
+			auto tokens = SplitByChar(line, ' ');	// split line by spaces ' '
+			tokens.erase(tokens.begin());			// remove 'v' prefix
+
+			vertices.push_back({ 0, 0, 0 });
+
+			for (int i = 0; i < 3 && i < tokens.size(); i++) {
+				if (i == 0) vertices.back().pos.x = std::atof(tokens[i].c_str());
+				if (i == 1) vertices.back().pos.y = std::atof(tokens[i].c_str());
+				if (i == 2) vertices.back().pos.z = std::atof(tokens[i].c_str());
+			}
+		}
+	}
+
+	for (auto line : lines) {
+		if (line.empty()) continue;
+
+		if (line[0] == 'f') {						// if line starts with an 'f'
+			auto tokens = SplitByChar(line, ' ');	// split line by spaces ' '
+			tokens.erase(tokens.begin());			// remove 'f' prefix
+
+			faces.push_back({});
+
+			for (auto token : tokens) {
+				auto subtokens = SplitByChar(token, '/');		// split a single vertex data by '/' into subtokens
+
+				for (int i = 0; i < 3 && i < subtokens.size(); i++) {
+					auto subtoken = subtokens[i];
+
+					if (i == 1 && subtoken.empty()) continue;	// no texture index e.g. "f 1//1 2//2 3//3"
+
+					if (i == 0) faces.back().vertexIndices.push_back(std::atoi(subtoken.c_str()));
+					if (i == 1) faces.back().textureIndices.push_back(std::atoi(subtoken.c_str()));
+					if (i == 2) faces.back().normalIndices.push_back(std::atoi(subtoken.c_str()));
+
+				}
+			}
+		}
+	}
+
+	for (int i = 1; i < faces.size(); i++) {
+		if (faces[i].vertexIndices.size() != faces[i - 1].vertexIndices.size()) {
+			Popup(L"Inconsistent number of vertices per face: \"" + filepath + L"\"");
+			return;
+		}
+	}
+
+	for (auto face : faces) {
+		if (face.vertexIndices.size() == 3)			topology = TRIANGLE_LIST;
+		else if (face.vertexIndices.size() == 4)	topology = QUAD_LIST;
+		else										topology = POINT_LIST;
+
+		break;
+	}
+
+	for (auto face : faces) {
+		for (auto vertexIndex : face.vertexIndices) {
+			if (vertexIndex < 0) vertexIndex = vertices.size() + (vertexIndex + 1);	// convert negative indices to positive
+
+			vertexIndex -= 1;		// Wavefront .obj face vertex indices are counted from 1 up
+
+			if (vertexIndex < 0 || vertexIndex >= vertices.size()) {
+				Popup(L"Invalid vertex index in face data: \"" + filepath + L"\"");
+				return;
+			}
+
+			AddVertex(vertices[vertexIndex]);
+		}
+	}
+}
+

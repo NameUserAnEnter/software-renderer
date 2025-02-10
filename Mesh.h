@@ -27,6 +27,8 @@ public:
 
 	void ApplyTransformation();
 
+	void LoadWavefrontObj(std::wstring);
+
 public:
 	Vertex* vertices;
 	Vertex* outputBuffer;		// transformed coordinates can be written to that buffer

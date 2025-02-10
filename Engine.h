@@ -31,8 +31,6 @@ private:
 	void InitCustomScene();
 	void InitModels();
 
-	void LoadWavefrontObj(Mesh&, std::wstring);
-
 	void ReadUserInput();
 	void UpdateOutput();
 	void RenderScene();
