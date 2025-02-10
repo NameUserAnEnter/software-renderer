@@ -9,6 +9,8 @@ Mesh::Mesh() {
 	outputBuffer = (Vertex*) calloc(0, sizeof(Vertex));
 
 	cVertices = 0;
+
+	topology = POINT_LIST;
 }
 
 Mesh::~Mesh() {

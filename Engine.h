@@ -31,6 +31,8 @@ private:
 	void InitCustomScene();
 	void InitModels();
 
+	void LoadWavefrontObj(Mesh&, std::wstring);
+
 	void ReadUserInput();
 	void UpdateOutput();
 	void RenderScene();
@@ -71,13 +73,6 @@ private:
 
 	float3 saved_pos;
 	float3 saved_angle;
-
-	enum TOPOLOGIES {
-		POINT_LIST,
-		LINE_LIST, LINE_STRIP,
-		TRIANGLE_LIST, TRIANGLE_STRIP,
-		QUAD_LIST
-	} current_topology;
 
 	bool bWireframe;		// has impact only on polygonal topologies
 };

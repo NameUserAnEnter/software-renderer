@@ -13,8 +13,6 @@ Engine::Engine() {
 	drawingColor	= Color::white;
 	backgroundColor = Color::dark_gray;
 
-	current_topology = TOPOLOGIES::QUAD_LIST;
-
 	bWireframe = true;
 }
 
@@ -85,7 +83,9 @@ void Engine::OnWindowResize(unsigned int uNewClientWidth, unsigned int uNewClien
 }
 
 void Engine::InitCustomScene() {
-	InitModels();
+	//InitModels();
+	scene.AddMesh();
+	LoadWavefrontObj(*scene.meshes[scene.GetMeshCount() - 1], L"data/cube10.obj");
 
 	if (scene.GetMeshCount() <= 0) return;
 	Mesh& mesh = *scene.meshes[scene.GetMeshCount() - 1];
@@ -137,6 +137,8 @@ void Engine::InitModels() {
 	//		|/________________________________|/
 	//    121                                221
 	//
+
+	MESH_TOPOLOGY current_topology = QUAD_LIST;
 
 	if (current_topology == POINT_LIST) {
 		cube.AddVertex(v111);
@@ -389,6 +391,86 @@ void Engine::InitModels() {
 	}
 }
 
+void Engine::LoadWavefrontObj(Mesh& mesh, std::wstring filepath) {
+	std::vector<std::string> lines = SplitByChar(GetFileData(filepath.c_str()), '\n');
+
+	std::vector<Vertex> vertices;
+	std::vector<Face> faces;
+
+	for (auto line : lines) {
+		if (line.empty()) continue;
+
+		if (line[0] == 'v') {						// if line starts with a 'v'
+			auto tokens = SplitByChar(line, ' ');	// split line by spaces ' '
+			tokens.erase(tokens.begin());			// remove 'v' prefix
+
+			vertices.push_back({ 0, 0, 0 });
+
+			for (int i = 0; i < 3 && i < tokens.size(); i++) {
+				if (i == 0) vertices.back().pos.x = std::atof(tokens[i].c_str());
+				if (i == 1) vertices.back().pos.y = std::atof(tokens[i].c_str());
+				if (i == 2) vertices.back().pos.z = std::atof(tokens[i].c_str());
+			}
+		}
+	}
+
+	for (auto line : lines) {
+		if (line.empty()) continue;
+
+		if (line[0] == 'f') {						// if line starts with an 'f'
+			auto tokens = SplitByChar(line, ' ');	// split line by spaces ' '
+			tokens.erase(tokens.begin());			// remove 'f' prefix
+
+			faces.push_back({});
+
+			for (auto token : tokens) {
+				auto subtokens = SplitByChar(token, '/');		// split a single vertex data by '/' into subtokens
+
+				for (int i = 0; i < 3 && i < subtokens.size(); i++) {
+					auto subtoken = subtokens[i];
+
+					if (i == 1 && subtoken.empty()) continue;	// no texture index e.g. "f 1//1 2//2 3//3"
+
+					if (i == 0) faces.back().vertexIndices.push_back(std::atoi(subtoken.c_str()));
+					if (i == 1) faces.back().textureIndices.push_back(std::atoi(subtoken.c_str()));
+					if (i == 2) faces.back().normalIndices.push_back(std::atoi(subtoken.c_str()));
+
+				}
+			}
+		}
+	}
+
+	for (int i = 1; i < faces.size(); i++) {
+		if (faces[i].vertexIndices.size() != faces[i - 1].vertexIndices.size()) {
+			Popup(L"Inconsistent number of vertices per face: \"" + filepath + L"\"");
+			return;
+		}
+	}
+
+	for (auto face : faces) {
+		if (face.vertexIndices.size() == 3)			mesh.topology = TRIANGLE_LIST;
+		else if (face.vertexIndices.size() == 4)	mesh.topology = QUAD_LIST;
+		else										mesh.topology = POINT_LIST;
+
+		break;
+	}
+
+	for (auto face : faces) {
+		for (auto vertexIndex : face.vertexIndices) {
+			if (vertexIndex < 0) vertexIndex = vertices.size() + (vertexIndex + 1);	// convert negative indices to positive
+
+			vertexIndex -= 1;		// Wavefront .obj face vertex indices are counted from 1 up
+
+			if (vertexIndex < 0 || vertexIndex >= vertices.size()) {
+				Popup(L"Invalid vertex index in face data: \"" + filepath + L"\"");
+				return;
+			}
+
+			mesh.AddVertex(vertices[vertexIndex]);
+		}
+	}
+}
+
 void Engine::ReadUserInput() {
 	if (Input::Esc) StopEngine();
 
@@ -483,7 +565,7 @@ void Engine::RenderScene() {
 
 		VerticesToScreen(vertices, cVertices);
 
-		switch (current_topology) {
+		switch (mesh.topology) {
 			case POINT_LIST:		DrawPointList(vertices, cVertices);		break;
 			case LINE_LIST:			DrawLineList(vertices, cVertices);		break;
 			case LINE_STRIP:		DrawLineStrip(vertices, cVertices);		break;
