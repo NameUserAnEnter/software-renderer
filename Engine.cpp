@@ -95,8 +95,6 @@ void Engine::InitCustomScene() {
 	mesh.t.angle = { PI / -8, 0, 0 };
 	//t.angle = { PI / -8, PI / 6, 0 };
 
-	mesh.ApplyTransformation();
-
 	saved_pos = mesh.t.pos;
 	saved_angle = mesh.t.angle;
 }
@@ -470,8 +468,6 @@ void Engine::ReadUserInput() {
 	if (Input::Mouse[mouse_control::SCROLL_UP])		*scrollable_values[scroll_mode] += delta_scroll;
 
 	controlled.scale = { scale, scale, scale };
-	
-	//mesh.ApplyTransformation();
 }
 
 void Engine::UpdateOutput() {
@@ -499,7 +495,24 @@ void Engine::RenderScene() {
 		Mesh& mesh = *scene.meshes[i];
 
 		unsigned int cVertices = mesh.GetVertexCount();
-		Vertex* vertices = mesh.vertices;
+		Vertex* vertices = (Vertex*) calloc((size_t) cVertices, sizeof(Vertex));
+		
+		if (vertices == nullptr) continue;
+
+		for (int j = 0; j < cVertices; j++) {
+			vertices[j] = mesh.vertices[j];
+
+			Vertex& vertex = vertices[j];
+			Transformation& t = mesh.t;
+
+			Geometry::RotateAroundAxisY(vertex.pos, -t.angle.y);
+			Geometry::RotateAroundAxisX(vertex.pos, -t.angle.x);
+			Geometry::RotateAroundAxisZ(vertex.pos, -t.angle.z);
+
+			Geometry::Scale(vertex.pos, t.scale);
+
+			Geometry::Translate(vertex.pos, t.pos);
+		}
 
 		MeshFullTransformation(vertices, cVertices);
 
@@ -512,7 +525,7 @@ void Engine::RenderScene() {
 			case UNDEFINED:			DrawPointList(vertices, cVertices);		break;
 		}
 
-		MeshFullTransformationReverse(vertices, cVertices);
+		free(vertices);
 	}
 }
 
