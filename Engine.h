@@ -76,8 +76,7 @@ private:
 		POINT_LIST,
 		LINE_LIST, LINE_STRIP,
 		TRIANGLE_LIST, TRIANGLE_STRIP,
-		QUAD_LIST,
-		UNDEFINED, UNDEFINED2
+		QUAD_LIST
 	} current_topology;
 
 	bool bWireframe;		// has impact only on polygonal topologies
