@@ -20,6 +20,7 @@ public:
 
 public:
 	Vertex* vertices;
+	Vertex* outputBuffer;		// transformed coordinates can be written to that buffer
 
 	Transformation t;
 

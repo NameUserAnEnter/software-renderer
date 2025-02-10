@@ -1,35 +1,22 @@
 #include "Viewport.h"
 
-int2 Viewport::ToScreen(float3 world) {
-	int2 screen;
-	//world.x                                                 = (screen.x - uViewportWidth / 2.f) / (uViewportWidth / 2.f);
-	//world.x * (uViewportWidth / 2.f)                        = screen.x - uViewportWidth / 2.f
-	//world.x * (uViewportWidth / 2.f) + uViewportWidth / 2.f = screen.x
-
-	//screen.x = world.x * (uViewportWidth / 2.f) + uViewportWidth / 2.f;
-	//screen.y = world.y * (uViewportHeight / 2.f) + uViewportHeight /2.f;
-
-	world.x *= (viewportSize.y / viewportSize.x);
-	world.z *= -1;
-
-	screen.x = (world.x * (world.z * FOV + z_offset)) * (viewportSize.x / 2) + viewportSize.x / 2;
-	screen.y = (world.y * (world.z * FOV + z_offset)) * (viewportSize.y / 2 * -1) + viewportSize.y /2;
-
-	return screen;
+void Viewport::VertexAspectTransformation(float3& pos) {
+	pos.x *= (viewportSize.y / viewportSize.x);
 }
 
-float3 Viewport::ToWorld(int2 screen) {
-	return ToWorld(screen, 0.0f);
+void Viewport::VertexPerspectiveTransformation(float3& pos) {
+	pos.z *= -1;
+
+	pos.x *= pos.z * FOV + z_offset;
+	pos.y *= pos.z * FOV + z_offset;
 }
 
-float3 Viewport::ToWorld(int2 screen, float z) {
-	//float3 world;
-	//world.x = (screen.x - uViewportWidth / 2.f) / (uViewportWidth / 2.f);
-	//world.y = (screen.y - uViewportHeight / 2.f) / (uViewportHeight / 2.f) * (-1);
-	//world.z = z;
+void Viewport::VertexScreenTransformation(float3& pos) {
+	pos.x *= (viewportSize.x / 2);
+	pos.x += (viewportSize.x / 2);
 
-	//return world;
-	
-	return { 0, 0, 0 };
+	pos.y *= -1;
+	pos.y *= (viewportSize.y / 2);
+	pos.y += (viewportSize.y / 2);
 }
 

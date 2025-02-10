@@ -35,18 +35,7 @@ private:
 	void UpdateOutput();
 	void RenderScene();
 
-	// Vertex pipeline methods, consider moving to viewport class as non-static methods
-	static void VertexAspectTransformation(float3&, float2);
-	static void VertexAspectTransformationReverse(float3&, float2);
-
-	static void VertexPerspectiveTransformation(float3&, float, float);
-	static void VertexPerspectiveTransformationReverse(float3&, float, float);
-
-	static void VertexScreenTransformation(float3&, float2);
-	static void VertexScreenTransformationReverse(float3&, float2);
-
-	void MeshFullTransformation(Vertex*, unsigned int);
-	void MeshFullTransformationReverse(Vertex*, unsigned int);
+	void MeshToScreen(Vertex*, unsigned int);
 
 	// Draw topology methods used by RenderScene()
 	void DrawPointList(Vertex*, unsigned int);

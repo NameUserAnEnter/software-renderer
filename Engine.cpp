@@ -439,6 +439,9 @@ void Engine::ReadUserInput() {
 	//if (Input::Alpha[W]) controlled.pos.z += delta_pos;
 	//if (Input::Alpha[S]) controlled.pos.z -= delta_pos;
 
+	//if (Input::Alpha[W]) controlled.pos.y += delta_pos;
+	//if (Input::Alpha[S]) controlled.pos.y -= delta_pos;
+
 	if (Input::Alpha[A]) controlled.pos.x -= delta_pos;
 	if (Input::Alpha[D]) controlled.pos.x += delta_pos;
 
@@ -483,7 +486,7 @@ void Engine::UpdateOutput() {
 	
 	if (mesh.GetVertexCount() > 0) {
 		float3 p = mesh.vertices[0].pos;
-		output += ", first vertex: ("	+ NumStr(p.x) + ", " + NumStr(p.y) + ", " + NumStr(p.z) + ")";
+		output += ", vertex0: ("	+ NumStr(p.x) + ", " + NumStr(p.y) + ", " + NumStr(p.z) + ")";
 	}
 
 	SetWindowTitle(hWindow, output);
@@ -493,28 +496,12 @@ void Engine::UpdateOutput() {
 void Engine::RenderScene() {
 	for (int i = 0; i < scene.GetMeshCount(); i++) {
 		Mesh& mesh = *scene.meshes[i];
+		mesh.ApplyTransformation();
 
+		Vertex* vertices = mesh.outputBuffer;
 		unsigned int cVertices = mesh.GetVertexCount();
-		Vertex* vertices = (Vertex*) calloc((size_t) cVertices, sizeof(Vertex));
-		
-		if (vertices == nullptr) continue;
 
-		for (int j = 0; j < cVertices; j++) {
-			vertices[j] = mesh.vertices[j];
-
-			Vertex& vertex = vertices[j];
-			Transformation& t = mesh.t;
-
-			Geometry::RotateAroundAxisY(vertex.pos, -t.angle.y);
-			Geometry::RotateAroundAxisX(vertex.pos, -t.angle.x);
-			Geometry::RotateAroundAxisZ(vertex.pos, -t.angle.z);
-
-			Geometry::Scale(vertex.pos, t.scale);
-
-			Geometry::Translate(vertex.pos, t.pos);
-		}
-
-		MeshFullTransformation(vertices, cVertices);
+		MeshToScreen(vertices, cVertices);
 
 		switch (current_topology) {
 			case POINT_LIST:		DrawPointList(vertices, cVertices);		break;
@@ -522,66 +509,17 @@ void Engine::RenderScene() {
 			case LINE_STRIP:		DrawLineStrip(vertices, cVertices);		break;
 			case TRIANGLE_LIST:		DrawTriangleList(vertices, cVertices);	break;
 			case TRIANGLE_STRIP:	DrawTriangleStrip(vertices, cVertices);	break;
+
 			case UNDEFINED:			DrawPointList(vertices, cVertices);		break;
 		}
-
-		free(vertices);
 	}
 }
 
-void Engine::VertexAspectTransformation(float3& pos, float2 viewportSize) {
-	pos.x *= (viewportSize.y / viewportSize.x);
-}
-
-void Engine::VertexAspectTransformationReverse(float3& pos, float2 viewportSize) {
-	pos.x /= (viewportSize.y / viewportSize.x);
-}
-
-void Engine::VertexPerspectiveTransformation(float3& pos, float FOV, float z_offset) {
-	pos.z *= -1;
-
-	pos.x *= pos.z * FOV + z_offset;
-	pos.y *= pos.z * FOV + z_offset;
-}
-
-void Engine::VertexPerspectiveTransformationReverse(float3& pos, float FOV, float z_offset) {
-	pos.x /= pos.z * FOV + z_offset;
-	pos.y /= pos.z * FOV + z_offset;
-
-	pos.z *= -1;
-}
-
-void Engine::VertexScreenTransformation(float3& pos, float2 viewportSize) {
-	pos.x *= -(viewportSize.x / 2);
-	pos.x +=  (viewportSize.x / 2);
-
-	pos.y *= -1;
-	pos.y *= -(viewportSize.y / 2);
-	pos.y +=  (viewportSize.y / 2);
-}
-
-void Engine::VertexScreenTransformationReverse(float3& pos, float2 viewportSize) {
-	pos.x -=  (viewportSize.x / 2);
-	pos.x /= -(viewportSize.x / 2);
-
-	pos.y -=  (viewportSize.y / 2);
-	pos.y /= -(viewportSize.y / 2);
-	pos.y *= -1;
-}
-
-void Engine::MeshFullTransformation(Vertex* vertices, unsigned int cVertices) {
+void Engine::MeshToScreen(Vertex* vertices, unsigned int cVertices) {
 	for (int i = 0; i < cVertices; i++) {
-		VertexAspectTransformation(vertices[i].pos, viewport.viewportSize);
-		VertexPerspectiveTransformation(vertices[i].pos, viewport.FOV, viewport.z_offset);
-		VertexScreenTransformation(vertices[i].pos, viewport.viewportSize);
-	}
-}
-
-void Engine::MeshFullTransformationReverse(Vertex* vertices, unsigned int cVertices) {
-	for (int i = 0; i < cVertices; i++) {
-		VertexScreenTransformationReverse(vertices[i].pos, viewport.viewportSize);
-		VertexPerspectiveTransformationReverse(vertices[i].pos, viewport.FOV, viewport.z_offset);
-		VertexAspectTransformationReverse(vertices[i].pos, viewport.viewportSize);
+		viewport.VertexAspectTransformation(vertices[i].pos);
+		viewport.VertexPerspectiveTransformation(vertices[i].pos);
+		viewport.VertexScreenTransformation(vertices[i].pos);
 	}
 }
 

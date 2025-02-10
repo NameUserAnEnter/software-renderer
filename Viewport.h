@@ -3,11 +3,14 @@
 
 #include "DimensionalTypes.h"
 
-struct Viewport {
-	int2 ToScreen(float3);
-	float3 ToWorld(int2);
-	float3 ToWorld(int2, float);
+class Viewport {
+public:
+	// Vertex pipeline methods
+	void VertexAspectTransformation(float3&);
+	void VertexPerspectiveTransformation(float3&);
+	void VertexScreenTransformation(float3&);
 
+public:
 	float z_offset;
 	float FOV;
 
