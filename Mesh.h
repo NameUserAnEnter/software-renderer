@@ -32,7 +32,7 @@ public:
 
 public:
 	Vertex* vertices;
-	Vertex* outputBuffer;		// transformed coordinates can be written to that buffer
+	Vertex* outputBuffer;		// a secondary buffer holding non-reversibly transformed coordinates
 
 	Transformation t;
 

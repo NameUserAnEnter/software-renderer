@@ -128,22 +128,28 @@ void Mesh::LoadWavefrontObj(std::wstring filepath) {
 		}
 	}
 
-	for (int i = 1; i < faces.size(); i++) {
-		if (faces[i].vertexIndices.size() != faces[i - 1].vertexIndices.size()) {
-			Popup(L"Inconsistent number of vertices per face: \"" + filepath + L"\"");
-			return;
-		}
+	unsigned int count_triangles = 0;
+	unsigned int count_quads = 0;
+
+	for (auto face : faces) {
+		if (face.vertexIndices.size() == 3)			count_triangles++;
+		else if (face.vertexIndices.size() == 4)	count_quads++;
+	}
+
+	if (count_triangles == 0 && count_quads == 0)	topology = POINT_LIST;
+	else if (count_triangles > count_quads)			topology = TRIANGLE_LIST;
+	else											topology = QUAD_LIST;
+
+	unsigned int verticesPerFace = 0;
+	if (topology == TRIANGLE_LIST) verticesPerFace = 3;
+	else if (topology == QUAD_LIST) verticesPerFace = 4;
+	else if (topology == POINT_LIST) {
+		for (auto vertex : vertices) AddVertex(vertex);
 	}
 
 	for (auto face : faces) {
-		if (face.vertexIndices.size() == 3)			topology = TRIANGLE_LIST;
-		else if (face.vertexIndices.size() == 4)	topology = QUAD_LIST;
-		else										topology = POINT_LIST;
+		if (face.vertexIndices.size() != verticesPerFace) continue;
 
-		break;
-	}
-
-	for (auto face : faces) {
 		for (auto vertexIndex : face.vertexIndices) {
 			if (vertexIndex < 0) vertexIndex = vertices.size() + (vertexIndex + 1);	// convert negative indices to positive
 

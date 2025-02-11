@@ -12,7 +12,10 @@ public:
 	void Begin();
 	void End();
 
-	void AddMesh();
+	bool AddMesh();
+	bool AddMesh(std::string);
+	bool AddMesh(std::wstring);
+
 	unsigned int GetMeshCount();
 
 	//Mesh& GetMesh(unsigned int);

@@ -5,6 +5,22 @@
 #include <string>
 #include <vector>
 
+inline std::wstring toWide(std::string str) {
+	std::wstring wide = L"";
+	for (auto c : str) {
+		wide += (wchar_t) c;
+	}
+	return wide;
+}
+
+inline std::string toNarrow(std::wstring str) {
+	std::string narrow = "";
+	for (auto c : str) {
+		narrow += (unsigned char) c;
+	}
+	return narrow;
+}
+
 inline bool StrContains(std::string str, char c) {
 	for (char current : str) {
 		if (current == c) return true;

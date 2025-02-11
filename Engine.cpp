@@ -91,9 +91,7 @@ void Engine::InitCustomScene() {
 
 	//InitModels();
 
-	scene.AddMesh();
-	//scene.meshes[scene.GetMeshCount() -1]->LoadWavefrontObj(L"data/cube4.obj");
-	scene.meshes[scene.GetMeshCount() -1]->LoadWavefrontObj(L"data/car1-filtered2.obj");
+	scene.AddMesh("data/car1.obj");
 
 	if (scene.GetMeshCount() <= 0) return;
 	Mesh& mesh = *scene.meshes[scene.GetMeshCount() - 1];
