@@ -47,7 +47,7 @@ void Engine::Release() {
 }
 
 void Engine::Update() {
-	output += NumStr(viewport.viewportSize.x) + "x" + NumStr(viewport.viewportSize.y) + ", ";
+	output += "Client resolution: " + NumStr(viewport.viewportSize.x) + "x" + NumStr(viewport.viewportSize.y) + "\n\n";
 
 	// Logic
 	ReadUserInput();
@@ -55,13 +55,15 @@ void Engine::Update() {
 	Clock::TimeUpdate();
 	Input::UpdateInputs();	// resets some inputs to a non-activated state, needs to be called after the input is read
 
-	UpdateOutput();
-
 	// Clear backbuffer
 	graphics.ClearBackBuffer();
 
+
 	// Render scene geometry
 	RenderScene();
+
+	// Print info
+	UpdateOutput();
 
 	// Present the scene
 	graphics.UpdateFrontBuffer();
@@ -87,7 +89,9 @@ void Engine::OnWindowResize(unsigned int uNewClientWidth, unsigned int uNewClien
 }
 
 void Engine::InitCustomScene() {
-	SetWindowTitle(hWindow, "Initializing scene...");
+	graphics.ClearBackBuffer();
+	graphics.Print("Initializing scene...", 20, 20, Graphics::TEXT_ORIENTATION::CENTER);
+	graphics.UpdateFrontBuffer();
 
 	//InitModels();
 
@@ -452,7 +456,7 @@ void Engine::ReadUserInput() {
 	if (Input::Alpha[X]) scroll_mode = 1;
 	if (Input::Alpha[C]) scroll_mode = 2;
 
-	output += "scroll mode: " + NumStr(scroll_mode) + ", ";
+	output += "scroll mode: " + NumStr(scroll_mode) + "\n\n";
 
 	if (Input::Shift) delta_scroll *= 10;
 
@@ -467,20 +471,22 @@ void Engine::UpdateOutput() {
 	Mesh& mesh = *scene.meshes[scene.GetMeshCount() - 1];
 	Transformation& t = mesh.t;
 
-	output += "cube pos: ("		+ NumStr(t.pos.x) + ", " + NumStr(t.pos.y) + ", " + NumStr(t.pos.z) + "), ";
-	output += "cube angle: ("	+ NumStr(t.angle.x) + ", " + NumStr(t.angle.y) + ", " + NumStr(t.angle.z) + "), ";
-	output += "cube scale: ("	+ NumStr(t.scale.x) + ", " + NumStr(t.scale.y) + ", " + NumStr(t.scale.z) + "), ";
-	output += "z_offset: "		+ NumStr(viewport.z_offset) + ", ";
-	output += "FOV: "			+ NumStr(viewport.FOV);
+	output += "mesh pos:    ("	+ NumStr(t.pos.x) + ", " + NumStr(t.pos.y) + ", " + NumStr(t.pos.z) + ")\n";
+	output += "mesh angle:  ("	+ NumStr(t.angle.x) + ", " + NumStr(t.angle.y) + ", " + NumStr(t.angle.z) + ")\n";
+	output += "mesh scale:  ("	+ NumStr(t.scale.x) + ", " + NumStr(t.scale.y) + ", " + NumStr(t.scale.z) + ")\n\n";
+
+	output += "z_offset:    "	+ NumStr(viewport.z_offset) + "\n";
+	output += "FOV:         "	+ NumStr(viewport.FOV);
 	
 	if (mesh.GetVertexCount() > 0) {
 		float3 p = mesh.vertices[0].pos;
-		output += ", vertex0: ("	+ NumStr(p.x) + ", " + NumStr(p.y) + ", " + NumStr(p.z) + "), ";
+		output += "\n\nvertex0: ("	+ NumStr(p.x) + ", " + NumStr(p.y) + ", " + NumStr(p.z) + ")\n";
 	}
 
-	output += "Framerate: " + NumStr(Clock::updates_in_last_sec);
+	output += "\nFramerate: " + NumStr(Clock::updates_in_last_sec);
 
-	SetWindowTitle(hWindow, output);
+	graphics.Print(output, 20, 20);
+
 	output = "";
 }
 
@@ -621,7 +627,6 @@ void Engine::DrawQuadList(Vertex* vertices, unsigned int cVertices) {
 }
 
 // To do:
-// --- Use project13 text rendering
 // --- Implement buttons and sliders to tweak some values like FOV, z_offset, scroll mode, wireframe switch and transformations
 // --- Implement a near and far clipping plane and/or
 // change the perspective equations so that points would collapse at the center after reaching some distance
@@ -634,4 +639,5 @@ void Engine::DrawQuadList(Vertex* vertices, unsigned int cVertices) {
 // --- Implement culling after z-buffering, so that it doesn't get in the way
 // --- Implement a flexible vertex format; e.g. color, normals, texture coordinates, etc. in the vertex mesh element structure
 // --- Implement scene vertex, face, polygon counters
+// --- Implement an option to draw polygons using indices to a point list like vertex buffer with no duplicate vertices, compare performance
 

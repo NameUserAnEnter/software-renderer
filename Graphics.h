@@ -10,6 +10,9 @@
 
 class Graphics {
 public:
+	static enum TEXT_ORIENTATION { LEFT, RIGHT, CENTER };
+
+public:
 	Graphics();
 	~Graphics();
 
@@ -17,6 +20,22 @@ public:
 
 	void InitializeBuffers();
 	void ReleaseBuffers();
+
+	void ClearBackBuffer();
+	void UpdateFrontBuffer();
+
+private:
+	void update_buffer(HDC destination, HDC source);
+	bool within_window(int x, int y);
+
+public:
+	void ResizeBuffers(int width, int height);
+
+	bool SetRasterUnitThickness(unsigned int);
+	unsigned int GetRasterUnitThickness();
+
+	void Print(std::string, int, int, TEXT_ORIENTATION = TEXT_ORIENTATION::LEFT);
+	void Print(std::wstring, int, int, TEXT_ORIENTATION = TEXT_ORIENTATION::LEFT);
 
 	//		Rasterizer operations drawing on the backbuffer
 	// Direct bitmap rasterizing
@@ -48,18 +67,6 @@ public:
 	void FillQuad(int2, int2, int2, int2, ColorBlock);
 	//		---
 
-	void ClearBackBuffer();
-	void UpdateFrontBuffer();
-
-	void ResizeBuffers(int width, int height);
-
-	bool SetRasterUnitThickness(unsigned int);
-	unsigned int GetRasterUnitThickness();
-
-private:
-	void update_buffer(HDC destination, HDC source);
-	bool within_window(int x, int y);
-
 private:
 	HWND hWindow;
 
@@ -68,6 +75,8 @@ private:
 
 	HDC frontbuffer_dc;
 	HDC backbuffer_dc;
+
+	HFONT font;
 
 	HBITMAP cleanbuffer_bitmap;
 	HBITMAP backbuffer_bitmap;
