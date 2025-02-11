@@ -52,7 +52,7 @@ void Graphics::InitializeBuffers() {
 					  (DEFAULT_PITCH | FF_DONTCARE), TEXT("Consolas"));
 
 	if (SetTextColor(backbuffer_dc, RGB(255, 255, 255)) == CLR_INVALID) Popup("Failed to invoke SetTextColor()");
-	SetBkMode(backbuffer_dc, RGB(30, 30, 30));
+	SetBkMode(backbuffer_dc, TRANSPARENT);
 
 	if (font != NULL) SelectObject(backbuffer_dc, font);
 }
@@ -117,9 +117,9 @@ void Graphics::Print(std::wstring str, int x, int y, TEXT_ORIENTATION orientatio
 	ptr[str.size()] = L'\0';
 
 	UINT orientation_flag = DT_LEFT;
-	if (orientation == TEXT_ORIENTATION::LEFT) orientation_flag = DT_LEFT;
-	if (orientation == TEXT_ORIENTATION::RIGHT) orientation_flag = DT_RIGHT;
-	if (orientation == TEXT_ORIENTATION::CENTER) orientation_flag = DT_CENTER;
+	if (orientation == TEXT_ORIENTATION::ALIGN_LEFT) orientation_flag = DT_LEFT;
+	if (orientation == TEXT_ORIENTATION::ALIGN_RIGHT) orientation_flag = DT_RIGHT;
+	if (orientation == TEXT_ORIENTATION::ALIGN_CENTER) orientation_flag = DT_CENTER;
 
 	DrawTextW(backbuffer_dc, ptr, str.size(), &rect, orientation_flag);
 	free(ptr);

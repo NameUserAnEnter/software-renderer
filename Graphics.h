@@ -8,10 +8,9 @@
 #include "ColorDefs.h" // temporary
 #include "DimensionalTypes.h"
 
-class Graphics {
-public:
-	static enum TEXT_ORIENTATION { LEFT, RIGHT, CENTER };
+enum TEXT_ORIENTATION { ALIGN_LEFT, ALIGN_RIGHT, ALIGN_CENTER };
 
+class Graphics {
 public:
 	Graphics();
 	~Graphics();
@@ -34,8 +33,8 @@ public:
 	bool SetRasterUnitThickness(unsigned int);
 	unsigned int GetRasterUnitThickness();
 
-	void Print(std::string, int, int, TEXT_ORIENTATION = TEXT_ORIENTATION::LEFT);
-	void Print(std::wstring, int, int, TEXT_ORIENTATION = TEXT_ORIENTATION::LEFT);
+	void Print(std::string, int, int, TEXT_ORIENTATION = TEXT_ORIENTATION::ALIGN_LEFT);
+	void Print(std::wstring, int, int, TEXT_ORIENTATION = TEXT_ORIENTATION::ALIGN_LEFT);
 
 	//		Rasterizer operations drawing on the backbuffer
 	// Direct bitmap rasterizing

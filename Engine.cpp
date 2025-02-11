@@ -90,7 +90,7 @@ void Engine::OnWindowResize(unsigned int uNewClientWidth, unsigned int uNewClien
 
 void Engine::InitCustomScene() {
 	graphics.ClearBackBuffer();
-	graphics.Print("Initializing scene...", 20, 20, Graphics::TEXT_ORIENTATION::CENTER);
+	graphics.Print("Initializing scene...", 20, 20, ALIGN_CENTER);
 	graphics.UpdateFrontBuffer();
 
 	//InitModels();
