@@ -15,6 +15,8 @@ Engine::Engine() {
 
 	bWireframe = true;
 	bRenderBuffered = true;
+
+	textOffset = { 20, 20 };
 }
 
 void Engine::Init(HWND hWnd) {
@@ -89,9 +91,7 @@ void Engine::OnWindowResize(unsigned int uNewClientWidth, unsigned int uNewClien
 }
 
 void Engine::InitCustomScene() {
-	graphics.ClearBackBuffer();
-	graphics.Print("Initializing scene...", 20, 20, ALIGN_CENTER);
-	graphics.UpdateFrontBuffer();
+	Print("Initializing scene...", true, ALIGN_CENTER);
 
 	//InitModels();
 
@@ -485,9 +485,19 @@ void Engine::UpdateOutput() {
 
 	output += "\nFramerate: " + NumStr(Clock::updates_in_last_sec);
 
-	graphics.Print(output, 20, 20);
-
+	Print(output);
 	output = "";
+}
+
+void Engine::Print(std::string str, bool updateFrontBuffer, TEXT_ORIENTATION orientation) {
+	Print(toWide(str), updateFrontBuffer, orientation);
+}
+
+void Engine::Print(std::wstring str, bool updateFrontBuffer, TEXT_ORIENTATION orientation) {
+	if (updateFrontBuffer) graphics.ClearBackBuffer();
+
+	graphics.Print(str, textOffset.x, textOffset.y, orientation);
+	if (updateFrontBuffer) graphics.UpdateFrontBuffer();
 }
 
 void Engine::RenderScene() {

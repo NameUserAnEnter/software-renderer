@@ -36,6 +36,9 @@ private:
 
 	void UpdateOutput();
 
+	void Print(std::string, bool = false, TEXT_ORIENTATION = ALIGN_LEFT);
+	void Print(std::wstring, bool = false, TEXT_ORIENTATION = ALIGN_LEFT);
+
 	void RenderScene();
 
 	void VerticesToScreen(Vertex*, unsigned int);
@@ -72,6 +75,7 @@ private:
 	Viewport viewport;
 
 	std::string output;
+	int2 textOffset;
 
 	float3 saved_pos;
 	float3 saved_angle;
