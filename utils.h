@@ -110,5 +110,61 @@ inline std::vector<std::basic_string<T>> SplitByChar(std::basic_string<T> str, T
 	return parts;
 }
 
+template<typename T>
+inline std::vector<T> Quicksort(std::vector<T> data) {
+	if (data.size() <= 1) return data;
+
+	std::vector<T> h1; // first half
+	std::vector<T> h2; // second half
+
+	//								   = expected
+	//						  -> formula
+	//					 -> size
+	//				-> expected
+	// indices
+	// 0 1 2 3 4 5	-> 3 -> 6 -> 6 / 2 = 3
+	// 0 1 2 3 4	-> 2 -> 5 -> 5 / 2 = 2
+	// 0 1 2 3		-> 2 -> 4 -> 4 / 2 = 2
+	// 0 1 2		-> 1 -> 3 -> 3 / 2 = 1
+	// 0 1			-> 1 -> 2 -> 2 / 2 = 1
+
+	unsigned int pivot_point = data.size() / 2;
+
+	for (int i = 0; i < data.size(); i++) {
+		if (i == pivot_point) {
+			if (h1.size() >= h2.size()) h2.push_back(data[i]);
+			else						h1.push_back(data[i]);
+		}
+		else if (data[i] >  data[pivot_point]) h2.push_back(data[i]);
+		else if (data[i] <= data[pivot_point]) h1.push_back(data[i]);
+	}
+
+	h1 = Quicksort(h1);
+	h2 = Quicksort(h2);
+
+	std::vector<T> combined;
+	for (auto e : h1) combined.push_back(e);
+	for (auto e : h2) combined.push_back(e);
+
+	return combined;
+}
+
+template<typename T>
+inline bool Contains(std::vector<T> data, T element) {
+	for (auto e : data) {
+		if (e == element) return true;
+	}
+	return false;
+}
+
+template<typename T>
+inline std::vector<T> Reverse(std::vector<T> data) {
+	std::vector<T> reversed;
+	for (int i = 0; i < data.size(); i++) {
+		reversed.push_back(data[data.size() - 1 - i]);
+	}
+	return reversed;
+}
+
 #endif
 

@@ -49,7 +49,7 @@ void Engine::Release() {
 }
 
 void Engine::Update() {
-	output += "Client resolution: " + NumStr(viewport.viewportSize.x) + "x" + NumStr(viewport.viewportSize.y) + "\n\n";
+	output += "viewport resolution: " + NumStr(viewport.viewportSize.x) + "x" + NumStr(viewport.viewportSize.y) + "\n\n";
 
 	// Logic
 	ReadUserInput();
@@ -59,7 +59,6 @@ void Engine::Update() {
 
 	// Clear backbuffer
 	graphics.ClearBackBuffer();
-
 
 	// Render scene geometry
 	RenderScene();
@@ -95,15 +94,35 @@ void Engine::InitCustomScene() {
 
 	//InitModels();
 
-	scene.AddMesh("data/car1.obj");
+	scene.AddMesh("data/cube4.obj");
 
 	if (scene.GetMeshCount() <= 0) return;
 	Mesh& mesh = *scene.meshes[scene.GetMeshCount() - 1];
 
+	//mesh.t.scale = { 0.6, 0.6, 0.6 };
+	//mesh.t.pos = { 0, -0.6, 0 };
+	//mesh.t.angle = { 0, PI / -2.4, 0 };
+
 	mesh.t.scale = { 0.6, 0.6, 0.6 };
-	mesh.t.pos = { 0, -0.6, 0 };
-	mesh.t.angle = { 0, PI / -2.4, 0 };
-	//t.angle = { PI / -8, PI / 6, 0 };
+	mesh.t.angle = { PI / -10, 0, 0 };
+	//mesh.t.angle = { PI / -10, PI, 0 };
+
+	// highlight "front" face, when transformation is applied it's gonna be at the back
+	for (int i = 3; i < mesh.GetVertexCount(); i += 4) {
+		float3 face[] = {
+			mesh.vertices[i - 3].pos,
+			mesh.vertices[i - 2].pos,
+			mesh.vertices[i - 1].pos,
+			mesh.vertices[i].pos
+		};
+
+		if (face[2] == float3 { 1, 1, -1 } && face[3] == float3 { 1, -1, -1 } && face[1] == float3 { -1, 1, -1 } && face[0] == float3 { -1, -1, -1 }) {
+			mesh.vertices[i - 3].color = { 0, 255, 255 };
+			mesh.vertices[i - 2].color = { 0, 255, 255 };
+			mesh.vertices[i - 1].color = { 0, 255, 255 };
+			mesh.vertices[i].color = { 0, 255, 255 };
+		}
+	}
 
 	saved_pos = mesh.t.pos;
 	saved_angle = mesh.t.angle;
@@ -617,23 +636,67 @@ void Engine::DrawTriangleStrip(Vertex* vertices, unsigned int cVertices) {
 }
 
 void Engine::DrawQuadList(Vertex* vertices, unsigned int cVertices) {
+	// draw topology methods are called after z-axis inversion by vertex pipeline perspective transformation methods
+	// sort faces by max z of face vertices ...
+	std::vector<float> maxzs;
+
 	for (int i = 3; i < cVertices; i += 4) {
 		Vertex& v0 = vertices[i - 3];
 		Vertex& v1 = vertices[i - 2];
 		Vertex& v2 = vertices[i - 1];
 		Vertex& v3 = vertices[i];
 
+		float maxz = fmax(v0.pos.z, v1.pos.z); maxz = fmax(maxz, v2.pos.z); maxz = fmax(maxz, v3.pos.z);
+		maxzs.push_back(maxz);
+	}
+
+	maxzs = Reverse(Quicksort(maxzs));
+
+	static bool popup = true;
+
+	std::vector<int> facesRendered;
+
+	for (int i = 3; i < cVertices; i += 4) {
+		if (Contains(facesRendered, i)) continue;
+
+		Vertex& v0 = vertices[i - 3];
+		Vertex& v1 = vertices[i - 2];
+		Vertex& v2 = vertices[i - 1];
+		Vertex& v3 = vertices[i];
+
+		float maxz = fmax(v0.pos.z, v1.pos.z); maxz = fmax(maxz, v2.pos.z); maxz = fmax(maxz, v3.pos.z);
+
+		std::string output = NumStr(i) + ": " + NumStr(maxz) + "\n\n";
+		for (int i = 0; i < maxzs.size(); i++) output += NumStr(i) + ": " + NumStr(maxzs[i]) + "\n";
+
+		if (maxz != maxzs.back()) continue;
+		else {
+			facesRendered.push_back(i);
+
+			i = -1;
+			maxzs.pop_back();
+		}
+
 		int2 p0 = { v0.pos.x, v0.pos.y };
 		int2 p1 = { v1.pos.x, v1.pos.y };
 		int2 p2 = { v2.pos.x, v2.pos.y };
 		int2 p3 = { v3.pos.x, v3.pos.y };
 
-		ColorBlock color = drawingColor;
-		if (i < 7) color = Color::cyan;		// temporary highlight for future z-buffer testing
+		//if (popup) graphics.ClearBackBuffer();
 
-		if (bWireframe) graphics.DrawQuad(p0, p1, p2, p3, color);
-		else			graphics.FillQuad(p0, p1, p2, p3, color);
+		if (bWireframe) graphics.DrawQuad(p0, p1, p2, p3, v0.color);
+		else			graphics.FillQuad(p0, p1, p2, p3, v0.color);
+
+		if (popup) graphics.UpdateFrontBuffer();
+
+		output += "\n";
+		for (int i = 0; i < facesRendered.size(); i++) output += NumStr(i) + ": " + NumStr(facesRendered[i]) + "\n";
+		if (popup) Popup(output);
+
+		if (maxzs.empty()) break;
 	}
+
+	popup = false;
 }
 
 // To do:
@@ -645,9 +708,11 @@ void Engine::DrawQuadList(Vertex* vertices, unsigned int cVertices) {
 // --- Implement camera transformations
 // --- Add a grid plane to the scene
 // --- Performance consideration; implement buffer swapping / swap chain by using a pointer, instead of performing bit block transfers to the front buffer
-// --- Implement z-buffering or optionally some other hidden surface/line determination algorithm
+// --- Implement z-buffering or optionally some other hidden surface/line determination algorithm like the painter's algorithm
 // --- Implement culling after z-buffering, so that it doesn't get in the way
 // --- Implement a flexible vertex format; e.g. color, normals, texture coordinates, etc. in the vertex mesh element structure
 // --- Implement scene vertex, face, polygon counters
 // --- Implement an option to draw polygons using indices to a point list like vertex buffer with no duplicate vertices, compare performance
+// --- Implement ambient lighting
+// --- Switch to vector and matrix based geometric calculations and implement affine transformations
 

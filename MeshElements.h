@@ -2,12 +2,14 @@
 #define MESHELEMENTS_H
 
 #include "DimensionalTypes.h"
+#include "ColorBlock.h"
 #include "utils.h"
 #include <vector>
 #include <string>
 
 struct Vertex {
 	float3 pos;
+	ColorBlock color = { 255, 255, 255 };
 
 	void operator=(float3 f) {
 		pos = f;
