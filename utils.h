@@ -47,6 +47,15 @@ inline std::string NumStr(float num) {
 	return str;
 }
 
+inline std::string NumStr(float num, unsigned int minimal_length) {
+	std::string str = NumStr(num);
+
+	while (str.size() < minimal_length) {
+		str = ' ' + str;
+	}
+	return str;
+}
+
 inline void Popup(std::wstring message) {
 	MessageBoxW(NULL, message.c_str(), L"", MB_OK);
 }
@@ -143,6 +152,32 @@ inline std::vector<T> Quicksort(std::vector<T> data) {
 	h2 = Quicksort(h2);
 
 	std::vector<T> combined;
+	for (auto e : h1) combined.push_back(e);
+	for (auto e : h2) combined.push_back(e);
+
+	return combined;
+}
+
+template <typename T1, typename T2>
+inline std::vector<std::pair<T1, T2>> QuicksortMap(std::vector<std::pair<T1, T2>> data) {
+	if (data.size() <= 1) return data;
+
+	std::vector<std::pair<T1, T2>> h1, h2;
+	unsigned int pivot_point = data.size() / 2;
+
+	for (int i = 0; i < data.size(); i++) {
+		if (i == pivot_point) {
+			if (h1.size() >= h2.size()) h2.push_back(data[i]);
+			else						h1.push_back(data[i]);
+		}
+		else if (data[i].second >  data[pivot_point].second) h2.push_back(data[i]);
+		else if (data[i].second <= data[pivot_point].second) h1.push_back(data[i]);
+	}
+
+	h1 = QuicksortMap(h1);
+	h2 = QuicksortMap(h2);
+	
+	std::vector<std::pair<T1, T2>> combined;
 	for (auto e : h1) combined.push_back(e);
 	for (auto e : h2) combined.push_back(e);
 

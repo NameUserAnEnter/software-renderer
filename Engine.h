@@ -11,6 +11,7 @@
 #include "Input.h"
 #include "Clock.h"
 #include "utils.h"
+#include <map>
 
 class Engine {
 public:
@@ -30,7 +31,10 @@ public:
 
 private:
 	void InitCustomScene();
-	void InitModels();
+	void InitCustomModels();
+
+	void InitModelCube();
+	void InitModelCar();
 
 	void ReadUserInput();
 

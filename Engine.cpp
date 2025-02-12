@@ -92,43 +92,13 @@ void Engine::OnWindowResize(unsigned int uNewClientWidth, unsigned int uNewClien
 void Engine::InitCustomScene() {
 	Print("Initializing scene...", true, ALIGN_CENTER);
 
-	//InitModels();
+	//InitCustomModels();
 
-	scene.AddMesh("data/cube4.obj");
-
-	if (scene.GetMeshCount() <= 0) return;
-	Mesh& mesh = *scene.meshes[scene.GetMeshCount() - 1];
-
-	//mesh.t.scale = { 0.6, 0.6, 0.6 };
-	//mesh.t.pos = { 0, -0.6, 0 };
-	//mesh.t.angle = { 0, PI / -2.4, 0 };
-
-	mesh.t.scale = { 0.6, 0.6, 0.6 };
-	mesh.t.angle = { PI / -10, 0, 0 };
-	//mesh.t.angle = { PI / -10, PI, 0 };
-
-	// highlight "front" face, when transformation is applied it's gonna be at the back
-	for (int i = 3; i < mesh.GetVertexCount(); i += 4) {
-		float3 face[] = {
-			mesh.vertices[i - 3].pos,
-			mesh.vertices[i - 2].pos,
-			mesh.vertices[i - 1].pos,
-			mesh.vertices[i].pos
-		};
-
-		if (face[2] == float3 { 1, 1, -1 } && face[3] == float3 { 1, -1, -1 } && face[1] == float3 { -1, 1, -1 } && face[0] == float3 { -1, -1, -1 }) {
-			mesh.vertices[i - 3].color = { 0, 255, 255 };
-			mesh.vertices[i - 2].color = { 0, 255, 255 };
-			mesh.vertices[i - 1].color = { 0, 255, 255 };
-			mesh.vertices[i].color = { 0, 255, 255 };
-		}
-	}
-
-	saved_pos = mesh.t.pos;
-	saved_angle = mesh.t.angle;
+	//InitModelCube();
+	InitModelCar();
 }
 
-void Engine::InitModels() {
+void Engine::InitCustomModels() {
 	scene.AddMesh();
 	Mesh& cube = *scene.meshes[scene.GetMeshCount() - 1];
 
@@ -420,6 +390,51 @@ void Engine::InitModels() {
 	}
 }
 
+void Engine::InitModelCube() {
+	scene.AddMesh("data/cube4.obj");
+
+	if (scene.GetMeshCount() <= 0) return;
+	Mesh& mesh = *scene.meshes[scene.GetMeshCount() - 1];
+
+	mesh.t.scale = { 0.6, 0.6, 0.6 };
+	mesh.t.angle = { PI / -10, 0, 0 };
+	//mesh.t.angle = { PI / -10, PI, 0 };
+
+	// highlight "front" face, when transformation is applied it's gonna be at the back
+	for (int i = 3; i < mesh.GetVertexCount(); i += 4) {
+		float3 face[] = {
+			mesh.vertices[i - 3].pos,
+			mesh.vertices[i - 2].pos,
+			mesh.vertices[i - 1].pos,
+			mesh.vertices[i].pos
+		};
+
+		if (face[2] == float3 { 1, 1, -1 } && face[3] == float3 { 1, -1, -1 } && face[1] == float3 { -1, 1, -1 } && face[0] == float3 { -1, -1, -1 }) {
+			mesh.vertices[i - 3].color = { 0, 255, 255 };
+			mesh.vertices[i - 2].color = { 0, 255, 255 };
+			mesh.vertices[i - 1].color = { 0, 255, 255 };
+			mesh.vertices[i].color = { 0, 255, 255 };
+		}
+	}
+
+	saved_pos = mesh.t.pos;
+	saved_angle = mesh.t.angle;
+}
+
+void Engine::InitModelCar() {
+	scene.AddMesh("data/car1.obj");
+
+	if (scene.GetMeshCount() <= 0) return;
+	Mesh& mesh = *scene.meshes[scene.GetMeshCount() - 1];
+
+	mesh.t.scale = { 0.6, 0.6, 0.6 };
+	mesh.t.pos = { 0, -0.6, 0 };
+	mesh.t.angle = { 0, PI / -2.4, 0 };
+
+	saved_pos = mesh.t.pos;
+	saved_angle = mesh.t.angle;
+}
+
 void Engine::ReadUserInput() {
 	if (Input::Esc) StopEngine();
 
@@ -638,9 +653,7 @@ void Engine::DrawTriangleStrip(Vertex* vertices, unsigned int cVertices) {
 void Engine::DrawQuadList(Vertex* vertices, unsigned int cVertices) {
 	// draw topology methods are called after z-axis inversion by vertex pipeline perspective transformation methods
 	// sort faces by max z of face vertices ...
-	std::vector<float> maxzs;
-
-	// To do: use a key-value structure with 3, 7, 11, ... indices as keys and maxzs as values, then sort the key-value vector by values and loop by vector keys
+	std::vector<std::pair<int, float>> inds;
 
 	for (int i = 3; i < cVertices; i += 4) {
 		Vertex& v0 = vertices[i - 3];
@@ -649,55 +662,50 @@ void Engine::DrawQuadList(Vertex* vertices, unsigned int cVertices) {
 		Vertex& v3 = vertices[i];
 
 		float maxz = fmax(v0.pos.z, v1.pos.z); maxz = fmax(maxz, v2.pos.z); maxz = fmax(maxz, v3.pos.z);
-		maxzs.push_back(maxz);
+		inds.push_back({ i, maxz });
 	}
 
-	maxzs = Reverse(Quicksort(maxzs));
+	// sort ...
+	inds = QuicksortMap(inds);
 
-	//static bool popup = false;
+	//static bool popup = true;
+	//std::string output;
 
-	std::vector<int> facesRendered;
-	// maxzs is used as a remaining list which is constantly updated as faces are rendered and facesRendered grows
+	//for (int i = 3; i < cVertices; i += 4) {
+	for (int index = 0; index < inds.size(); index++) { // iterate over ind keys
+		const auto& e = inds[index];
 
-	for (int i = 3; i < cVertices; i += 4) {
-		if (Contains(facesRendered, i)) continue;
+		int i = e.first;
+		float maxz = e.second;
 
 		Vertex& v0 = vertices[i - 3];
 		Vertex& v1 = vertices[i - 2];
 		Vertex& v2 = vertices[i - 1];
 		Vertex& v3 = vertices[i];
 
-		float maxz = fmax(v0.pos.z, v1.pos.z); maxz = fmax(maxz, v2.pos.z); maxz = fmax(maxz, v3.pos.z);
+		//if (popup) {
+		//	output.clear();
 
-		//std::string output = NumStr(i) + ": " + NumStr(maxz) + "\n\n";
-		//for (int i = 0; i < maxzs.size(); i++) output += NumStr(i) + ": " + NumStr(maxzs[i]) + "\n";
+		//	for (auto p : inds) output += NumStr(p.first, 2) + ": " + NumStr(p.second, 13) + "\n";
+		//	output += "\n" + NumStr(i, 2) + ": " + NumStr(maxz, 13);
 
-		if (maxz != maxzs.back()) continue;
-		else {
-			facesRendered.push_back(i);
-
-			i = -1;
-			maxzs.pop_back();
-		}
+		//	graphics.ClearBackBuffer();
+		//}
 
 		int2 p0 = { v0.pos.x, v0.pos.y };
 		int2 p1 = { v1.pos.x, v1.pos.y };
 		int2 p2 = { v2.pos.x, v2.pos.y };
 		int2 p3 = { v3.pos.x, v3.pos.y };
 
-		//graphics.ClearBackBuffer();
-
 		if (bWireframe) graphics.DrawQuad(p0, p1, p2, p3, v0.color);
 		else			graphics.FillQuad(p0, p1, p2, p3, v0.color);
 
-		//output += "\n";
-		//for (int i = 0; i < facesRendered.size(); i++) output += NumStr(i) + ": " + NumStr(facesRendered[i]) + "\n";
-		////if (popup) Popup(output);
+		//if (popup) {
+		//	Print(output);
+		//	graphics.UpdateFrontBuffer();
 
-		//Print(output, false, ALIGN_RIGHT);
-		//graphics.UpdateFrontBuffer();
-
-		if (maxzs.empty()) break;
+		//	//Popup();
+		//}
 	}
 
 	//popup = false;
