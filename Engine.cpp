@@ -652,9 +652,10 @@ void Engine::DrawQuadList(Vertex* vertices, unsigned int cVertices) {
 
 	maxzs = Reverse(Quicksort(maxzs));
 
-	static bool popup = true;
+	//static bool popup = false;
 
 	std::vector<int> facesRendered;
+	// maxzs is used as a remaining list which is constantly updated as faces are rendered and facesRendered grows
 
 	for (int i = 3; i < cVertices; i += 4) {
 		if (Contains(facesRendered, i)) continue;
@@ -666,8 +667,8 @@ void Engine::DrawQuadList(Vertex* vertices, unsigned int cVertices) {
 
 		float maxz = fmax(v0.pos.z, v1.pos.z); maxz = fmax(maxz, v2.pos.z); maxz = fmax(maxz, v3.pos.z);
 
-		std::string output = NumStr(i) + ": " + NumStr(maxz) + "\n\n";
-		for (int i = 0; i < maxzs.size(); i++) output += NumStr(i) + ": " + NumStr(maxzs[i]) + "\n";
+		//std::string output = NumStr(i) + ": " + NumStr(maxz) + "\n\n";
+		//for (int i = 0; i < maxzs.size(); i++) output += NumStr(i) + ": " + NumStr(maxzs[i]) + "\n";
 
 		if (maxz != maxzs.back()) continue;
 		else {
@@ -682,21 +683,22 @@ void Engine::DrawQuadList(Vertex* vertices, unsigned int cVertices) {
 		int2 p2 = { v2.pos.x, v2.pos.y };
 		int2 p3 = { v3.pos.x, v3.pos.y };
 
-		//if (popup) graphics.ClearBackBuffer();
+		//graphics.ClearBackBuffer();
 
 		if (bWireframe) graphics.DrawQuad(p0, p1, p2, p3, v0.color);
 		else			graphics.FillQuad(p0, p1, p2, p3, v0.color);
 
-		if (popup) graphics.UpdateFrontBuffer();
+		//output += "\n";
+		//for (int i = 0; i < facesRendered.size(); i++) output += NumStr(i) + ": " + NumStr(facesRendered[i]) + "\n";
+		////if (popup) Popup(output);
 
-		output += "\n";
-		for (int i = 0; i < facesRendered.size(); i++) output += NumStr(i) + ": " + NumStr(facesRendered[i]) + "\n";
-		if (popup) Popup(output);
+		//Print(output, false, ALIGN_RIGHT);
+		//graphics.UpdateFrontBuffer();
 
 		if (maxzs.empty()) break;
 	}
 
-	popup = false;
+	//popup = false;
 }
 
 // To do:
