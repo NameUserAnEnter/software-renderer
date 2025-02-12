@@ -17,7 +17,7 @@ Engine::Engine() {
 
 	uLineThickness = 1;
 
-	bWireframe = false;
+	bWireframe = true;
 	bRenderBuffered = true;
 
 	bUseTestColors = true;
@@ -449,9 +449,9 @@ void Engine::ReadUserInput() {
 
 	float delta_pos = 0.01;
 	float delta_scroll = 0.01;
-	float delta_angle = (PI / 4) * 0.01;
+	float delta_angle = (PI / 4) * 0.001;
 
-	if (Input::Shift) delta_angle *= 5;
+	if (Input::Shift) delta_angle *= 15;
 	if (Input::Shift) delta_pos *= 5;
 
 	if (Input::Alpha[Q]) controlled.angle.y += delta_angle;
@@ -655,25 +655,31 @@ void Engine::DrawTriangleStrip(Vertex* vertices, unsigned int cVertices) {
 }
 
 void Engine::DrawQuadList(Vertex* vertices, unsigned int cVertices) {
-	// draw topology methods are called after z-axis inversion by vertex pipeline perspective transformation methods
-	// sort faces by max z of face vertices ...
+	// sort faces by z
+
 	std::vector<std::pair<int, float>> inds;
 
 	for (int i = 3; i < cVertices; i += 4) {
-		Vertex& v0 = vertices[i - 3];
-		Vertex& v1 = vertices[i - 2];
-		Vertex& v2 = vertices[i - 1];
-		Vertex& v3 = vertices[i];
+		//float closest_to_the_camera = (vertices[i - 3].pos.z);		// at this moment z is inverted
+		//closest_to_the_camera = fmin(closest_to_the_camera, vertices[i - 2].pos.z);
+		//closest_to_the_camera = fmin(closest_to_the_camera, vertices[i - 1].pos.z);
+		//closest_to_the_camera = fmin(closest_to_the_camera, vertices[i].pos.z);
 
-		float maxz = fmax(v0.pos.z, v1.pos.z); maxz = fmax(maxz, v2.pos.z); maxz = fmax(maxz, v3.pos.z);
-		inds.push_back({ i, maxz });
+		//inds.push_back({ i, closest_to_the_camera });
+
+		float furthest_from_the_camera = (vertices[i - 3].pos.z);
+		furthest_from_the_camera = fmax(furthest_from_the_camera, vertices[i - 2].pos.z);
+		furthest_from_the_camera = fmax(furthest_from_the_camera, vertices[i - 1].pos.z);
+		furthest_from_the_camera = fmax(furthest_from_the_camera, vertices[i].pos.z);
+
+		inds.push_back({ i, furthest_from_the_camera });
 	}
 
 	// sort ...
-	inds = QuicksortMap(inds);
+	inds = Reverse(QuicksortMap(inds));
 
-	//static bool popup = true;
-	//std::string output;
+	static bool popup = true;
+	std::string output;
 
 	// iterate over ind keys
 	//for (int index = 0; index < inds.size(); index++) {
@@ -688,14 +694,14 @@ void Engine::DrawQuadList(Vertex* vertices, unsigned int cVertices) {
 		const Vertex& v2 = vertices[e.first - 1];
 		const Vertex& v3 = vertices[e.first];
 
-		//if (popup) {
-		//	output.clear();
+		if (popup) {
+			output.clear();
 
-		//	for (auto p : inds) output += NumStr(p.first, 2) + ": " + NumStr(p.second, 13) + "\n";
-		//	output += "\n" + NumStr(i, 2) + ": " + NumStr(maxz, 13);
+			for (auto p : inds) output += NumStr(p.first, 2) + ": " + NumStr(p.second, 13) + "\n";
+			output += "\n" + NumStr(e.first, 2) + ": " + NumStr(e.second, 13);
 
-		//	graphics.ClearBackBuffer();
-		//}
+			graphics.ClearBackBuffer();
+		}
 
 		int2 p0 = { v0.pos.x, v0.pos.y };
 		int2 p1 = { v1.pos.x, v1.pos.y };
@@ -705,15 +711,15 @@ void Engine::DrawQuadList(Vertex* vertices, unsigned int cVertices) {
 		if (bWireframe) graphics.DrawQuad(p0, p1, p2, p3, v0.color);
 		else			graphics.FillQuad(p0, p1, p2, p3, v0.color);
 
-		//if (popup) {
-		//	Print(output);
-		//	graphics.UpdateFrontBuffer();
+		if (popup) {
+			Print(output);
+			graphics.UpdateFrontBuffer();
 
-		//	//Popup();
-		//}
+			Popup();
+		}
 	}
 
-	//popup = false;
+	popup = false;
 }
 
 // To do:
@@ -732,4 +738,5 @@ void Engine::DrawQuadList(Vertex* vertices, unsigned int cVertices) {
 // --- Implement an option to draw polygons using indices to a point list like vertex buffer with no duplicate vertices, compare performance
 // --- Implement ambient lighting
 // --- Switch to vector and matrix based geometric calculations and implement affine transformations
+// --- Implement multi-threading
 
