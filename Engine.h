@@ -89,7 +89,9 @@ private:
 	bool bWireframe;		// has impact only on polygonal topologies
 	bool bRenderBuffered;	// switch between buffered rendering relying on the output buffer in Mesh, or a two-way method using reverse transformations
 
-	bool bTestColors;
+	bool bUseTestColors;
+
+	std::vector<ColorBlock> testColors;
 };
 
 #endif

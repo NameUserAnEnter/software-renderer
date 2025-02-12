@@ -20,7 +20,14 @@ Engine::Engine() {
 	bWireframe = false;
 	bRenderBuffered = true;
 
-	bTestColors = true;
+	bUseTestColors = true;
+
+	testColors.push_back({ 255,   0, 255 });
+	testColors.push_back({   0, 127, 255 });
+	testColors.push_back({ 127,   0, 255 });
+	testColors.push_back({   0, 255, 255 });
+	testColors.push_back({ 255,   0, 127 });
+	testColors.push_back({   0, 255, 127 });
 }
 
 void Engine::Init(HWND hWnd) {
@@ -100,6 +107,21 @@ void Engine::InitCustomScene() {
 
 	InitModelCube();
 	//InitModelCar();
+
+	Mesh& mesh = *scene.meshes[scene.GetMeshCount() - 1];
+
+	saved_pos	= mesh.t.pos;
+	saved_angle = mesh.t.angle;
+
+	if (!bUseTestColors || testColors.size() < 2) return;
+
+	for (int i = 3; i < mesh.GetVertexCount(); i += 4) {
+		int r = ((i - 3) / 4) % testColors.size();
+
+		for (int j = 0; j < testColors.size(); j++) {
+			if (r == j) mesh.vertices[i - 3].color = testColors[r];
+		}
+	}
 }
 
 void Engine::InitCustomModels() {
@@ -405,20 +427,6 @@ void Engine::InitModelCube() {
 	mesh.t.scale = { 0.6, 0.6, 0.6 };
 	mesh.t.angle = { PI / -10, 0, 0 };
 	//mesh.t.angle = { PI / -10, PI, 0 };
-
-	saved_pos	= mesh.t.pos;
-	saved_angle = mesh.t.angle;
-
-	if (!bTestColors) return;
-
-	for (int i = 3; i < mesh.GetVertexCount(); i += 4) {
-		switch (((i - 3) / 4) % 4) {
-			case 0: mesh.vertices[i - 3].color = { 255,   0, 255 }; break;
-			case 1: mesh.vertices[i - 3].color = { 0, 255, 255 }; break;
-			case 2: mesh.vertices[i - 3].color = { 0, 255, 127 }; break;
-			case 3: mesh.vertices[i - 3].color = { 127,   0, 255 }; break;
-		}
-	}
 }
 
 void Engine::InitModelCar() {
@@ -430,20 +438,6 @@ void Engine::InitModelCar() {
 	mesh.t.scale = { 0.6, 0.6, 0.6 };
 	mesh.t.pos = { 0, -0.6, 0 };
 	mesh.t.angle = { 0, PI / -2.4, 0 };
-
-	saved_pos	= mesh.t.pos;
-	saved_angle = mesh.t.angle;
-
-	if (!bTestColors) return;
-
-	for (int i = 3; i < mesh.GetVertexCount(); i += 4) {
-		switch (((i - 3) / 4) % 4) {
-			case 0: mesh.vertices[i - 3].color = { 255,   0, 255 }; break;
-			case 1: mesh.vertices[i - 3].color = {   0, 255, 255 }; break;
-			case 2: mesh.vertices[i - 3].color = {   0, 255, 127 }; break;
-			case 3: mesh.vertices[i - 3].color = { 127,   0, 255 }; break;
-		}
-	}
 }
 
 void Engine::ReadUserInput() {
