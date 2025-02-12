@@ -13,10 +13,14 @@ Engine::Engine() {
 	drawingColor	= Color::white;
 	backgroundColor = Color::dark_gray;
 
-	bWireframe = true;
+	textOffset = { 20, 20 };
+
+	uLineThickness = 1;
+
+	bWireframe = false;
 	bRenderBuffered = true;
 
-	textOffset = { 20, 20 };
+	bTestColors = true;
 }
 
 void Engine::Init(HWND hWnd) {
@@ -37,7 +41,7 @@ void Engine::Init(HWND hWnd) {
 
 	graphics.Init(hWindow);
 	graphics.ResizeBuffers(ClientRect.right, ClientRect.bottom);		// also calls InitializeBuffers()
-	//graphics.SetRasterUnitThickness(5);
+	graphics.SetRasterUnitThickness(uLineThickness);
 
 	scene.Begin();
 	InitCustomScene();
@@ -94,12 +98,14 @@ void Engine::InitCustomScene() {
 
 	//InitCustomModels();
 
-	//InitModelCube();
-	InitModelCar();
+	InitModelCube();
+	//InitModelCar();
 }
 
 void Engine::InitCustomModels() {
 	scene.AddMesh();
+
+	if (scene.GetMeshCount() <= 0) return;
 	Mesh& cube = *scene.meshes[scene.GetMeshCount() - 1];
 
 	Vertex v111 = { -1,  1, -1 };
@@ -400,25 +406,19 @@ void Engine::InitModelCube() {
 	mesh.t.angle = { PI / -10, 0, 0 };
 	//mesh.t.angle = { PI / -10, PI, 0 };
 
-	// highlight "front" face, when transformation is applied it's gonna be at the back
-	for (int i = 3; i < mesh.GetVertexCount(); i += 4) {
-		float3 face[] = {
-			mesh.vertices[i - 3].pos,
-			mesh.vertices[i - 2].pos,
-			mesh.vertices[i - 1].pos,
-			mesh.vertices[i].pos
-		};
+	saved_pos	= mesh.t.pos;
+	saved_angle = mesh.t.angle;
 
-		if (face[2] == float3 { 1, 1, -1 } && face[3] == float3 { 1, -1, -1 } && face[1] == float3 { -1, 1, -1 } && face[0] == float3 { -1, -1, -1 }) {
-			mesh.vertices[i - 3].color = { 0, 255, 255 };
-			mesh.vertices[i - 2].color = { 0, 255, 255 };
-			mesh.vertices[i - 1].color = { 0, 255, 255 };
-			mesh.vertices[i].color = { 0, 255, 255 };
+	if (!bTestColors) return;
+
+	for (int i = 3; i < mesh.GetVertexCount(); i += 4) {
+		switch (((i - 3) / 4) % 4) {
+			case 0: mesh.vertices[i - 3].color = { 255,   0, 255 }; break;
+			case 1: mesh.vertices[i - 3].color = { 0, 255, 255 }; break;
+			case 2: mesh.vertices[i - 3].color = { 0, 255, 127 }; break;
+			case 3: mesh.vertices[i - 3].color = { 127,   0, 255 }; break;
 		}
 	}
-
-	saved_pos = mesh.t.pos;
-	saved_angle = mesh.t.angle;
 }
 
 void Engine::InitModelCar() {
@@ -431,8 +431,19 @@ void Engine::InitModelCar() {
 	mesh.t.pos = { 0, -0.6, 0 };
 	mesh.t.angle = { 0, PI / -2.4, 0 };
 
-	saved_pos = mesh.t.pos;
+	saved_pos	= mesh.t.pos;
 	saved_angle = mesh.t.angle;
+
+	if (!bTestColors) return;
+
+	for (int i = 3; i < mesh.GetVertexCount(); i += 4) {
+		switch (((i - 3) / 4) % 4) {
+			case 0: mesh.vertices[i - 3].color = { 255,   0, 255 }; break;
+			case 1: mesh.vertices[i - 3].color = {   0, 255, 255 }; break;
+			case 2: mesh.vertices[i - 3].color = {   0, 255, 127 }; break;
+			case 3: mesh.vertices[i - 3].color = { 127,   0, 255 }; break;
+		}
+	}
 }
 
 void Engine::ReadUserInput() {
@@ -503,11 +514,10 @@ void Engine::ReadUserInput() {
 void Engine::UpdateOutput() {
 	if (scene.GetMeshCount() <= 0) return;
 	Mesh& mesh = *scene.meshes[scene.GetMeshCount() - 1];
-	Transformation& t = mesh.t;
 
-	output += "mesh pos:    ("	+ NumStr(t.pos.x) + ", " + NumStr(t.pos.y) + ", " + NumStr(t.pos.z) + ")\n";
-	output += "mesh angle:  ("	+ NumStr(t.angle.x) + ", " + NumStr(t.angle.y) + ", " + NumStr(t.angle.z) + ")\n";
-	output += "mesh scale:  ("	+ NumStr(t.scale.x) + ", " + NumStr(t.scale.y) + ", " + NumStr(t.scale.z) + ")\n\n";
+	output += "mesh pos:    ("	+ NumStr(mesh.t.pos.x) + ", " + NumStr(mesh.t.pos.y) + ", " + NumStr(mesh.t.pos.z) + ")\n";
+	output += "mesh angle:  ("	+ NumStr(mesh.t.angle.x) + ", " + NumStr(mesh.t.angle.y) + ", " + NumStr(mesh.t.angle.z) + ")\n";
+	output += "mesh scale:  ("	+ NumStr(mesh.t.scale.x) + ", " + NumStr(mesh.t.scale.y) + ", " + NumStr(mesh.t.scale.z) + ")\n\n";
 
 	output += "z_offset:    "	+ NumStr(viewport.z_offset) + "\n";
 	output += "FOV:         "	+ NumStr(viewport.FOV);
@@ -671,17 +681,18 @@ void Engine::DrawQuadList(Vertex* vertices, unsigned int cVertices) {
 	//static bool popup = true;
 	//std::string output;
 
-	//for (int i = 3; i < cVertices; i += 4) {
-	for (int index = 0; index < inds.size(); index++) { // iterate over ind keys
-		const auto& e = inds[index];
+	// iterate over ind keys
+	//for (int index = 0; index < inds.size(); index++) {
+	//	const auto& e = inds[index];
 
-		int i = e.first;
-		float maxz = e.second;
+	//	int i = e.first;
+	//	float maxz = e.second;
 
-		Vertex& v0 = vertices[i - 3];
-		Vertex& v1 = vertices[i - 2];
-		Vertex& v2 = vertices[i - 1];
-		Vertex& v3 = vertices[i];
+	for (const auto& e : inds) {
+		const Vertex& v0 = vertices[e.first - 3];
+		const Vertex& v1 = vertices[e.first - 2];
+		const Vertex& v2 = vertices[e.first - 1];
+		const Vertex& v3 = vertices[e.first];
 
 		//if (popup) {
 		//	output.clear();
