@@ -640,6 +640,8 @@ void Engine::DrawQuadList(Vertex* vertices, unsigned int cVertices) {
 	// sort faces by max z of face vertices ...
 	std::vector<float> maxzs;
 
+	// To do: use a key-value structure with 3, 7, 11, ... indices as keys and maxzs as values, then sort the key-value vector by values and loop by vector keys
+
 	for (int i = 3; i < cVertices; i += 4) {
 		Vertex& v0 = vertices[i - 3];
 		Vertex& v1 = vertices[i - 2];
