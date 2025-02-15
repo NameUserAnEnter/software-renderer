@@ -13,26 +13,7 @@ public:
 	}
 
 	bool PointWithin(const float2& point) {
-		// ray-casting point-in-polygon algorithm ...
-
-		//// rectangle algorithm
-		//auto xmax = fmax(p1.x, p2.x); xmax = fmax(xmax, p3.x); xmax = fmax(xmax, p4.x);
-		//auto ymax = fmax(p1.y, p2.y); ymax = fmax(ymax, p3.y); ymax = fmax(ymax, p4.y);
-
-		//auto xmin = fmin(p1.x, p2.x); xmin = fmin(xmin, p3.x); xmin = fmin(xmin, p4.x);
-		//auto ymin = fmin(p1.y, p2.y); ymin = fmin(ymin, p3.y); ymin = fmin(ymin, p4.y);
-
-		//if (point.x > xmax || point.x < xmin) return false;
-		//if (point.y > ymax || point.y < ymin) return false;
-
-		//// if this point is reached, means the point is within the quad's bounding box rectangle
-		//// ...
-
-		// sides:
-		// p1 - p2
-		// p2 - p3
-		// p3 - p4
-		// p4 - p1
+		// ray-casting point-in-polygon algorithm
 
 		float2* sides[4][2];
 
@@ -61,7 +42,7 @@ public:
 			// if point.y is not inbetween a.y and b.y and neither equal to a.y or by, then the casted ray will not cross this side
 			if ((a.y < point.y && b.y < point.y) || (a.y > point.y && b.y > point.y)) continue;
 
-			// reference calculation relies on a.x being > b.x
+			// further calculations assume a.x >= b.x
 			if (a.x < b.x) {
 				float2 temp = a;
 				a = b;
@@ -77,7 +58,7 @@ public:
 			c.y = point.y;
 			c.x = (c.y - b.y) * ((a.x - b.x) / (a.y - b.y)) + b.x;
 
-			if (point.x < c.x) continue;
+			if (point.x >= c.x) continue;
 
 			crossed_sides++;
 		}
@@ -86,45 +67,22 @@ public:
 		if (crossed_sides % 2 == 0) return false;
 		return true;
 	}
-};
 
-struct Rectangle {
-	float2 p1, p2, p3, p4;
-
-	bool CoversOther(const Quad& other) {
-		if (PointWithin(other.p1) && PointWithin(other.p2) && PointWithin(other.p3) && PointWithin(other.p4)) return true;
-		return false;
-	}
-
-	bool PointWithin(const float2& point) {
-		// rectangle algorithm
-		auto xmax = fmax(p1.x, p2.x); xmax = fmax(xmax, p3.x); xmax = fmax(xmax, p4.x);
-		auto ymax = fmax(p1.y, p2.y); ymax = fmax(ymax, p3.y); ymax = fmax(ymax, p4.y);
-
-		auto xmin = fmin(p1.x, p2.x); xmin = fmin(xmin, p3.x); xmin = fmin(xmin, p4.x);
-		auto ymin = fmin(p1.y, p2.y); ymin = fmin(ymin, p3.y); ymin = fmin(ymin, p4.y);
-
-		if (point.x > xmax || point.x < xmin) return false;
-		if (point.y > ymax || point.y < ymin) return false;
-
-		return true;
-	}
-
-	static Rectangle BoundingBox(const Quad& q) {
+	static Quad BoundingBox(const Quad& q) {
 		auto xmax = fmax(q.p1.x, q.p2.x); xmax = fmax(xmax, q.p3.x); xmax = fmax(xmax, q.p4.x);
 		auto ymax = fmax(q.p1.y, q.p2.y); ymax = fmax(ymax, q.p3.y); ymax = fmax(ymax, q.p4.y);
 
 		auto xmin = fmin(q.p1.x, q.p2.x); xmin = fmin(xmin, q.p3.x); xmin = fmin(xmin, q.p4.x);
 		auto ymin = fmin(q.p1.y, q.p2.y); ymin = fmin(ymin, q.p3.y); ymin = fmin(ymin, q.p4.y);
 
-		Rectangle r = {
+		Quad b = {
 			{ xmin, ymin },
 			{ xmax, ymin },
 			{ xmax, ymax },
 			{ xmin, ymax }
 		};
 
-		return r;
+		return b;
 	}
 };
 

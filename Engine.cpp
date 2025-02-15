@@ -73,39 +73,39 @@ void Engine::Update() {
 
 	static bool fillShape = false;
 	Quad q = {
-		{ viewport.viewportSize.x / 2 - 400, viewport.viewportSize.y / 2 - 200 },
-		{ viewport.viewportSize.x / 2 + 300, viewport.viewportSize.y / 2 - 100 },
-		{ viewport.viewportSize.x / 2 + 400, viewport.viewportSize.y / 2 + 200 },
-		{ viewport.viewportSize.x / 2 - 300, viewport.viewportSize.y / 2 + 100 },
+		{ viewport.viewportSize.x / 2 - 300, viewport.viewportSize.y / 2 - 200 },
+		{ viewport.viewportSize.x / 2 + 400, viewport.viewportSize.y / 2 - 100 },
+		{ viewport.viewportSize.x / 2 + 300, viewport.viewportSize.y / 2 + 200 },
+		{ viewport.viewportSize.x / 2 - 400, viewport.viewportSize.y / 2 + 100 },
 	};
+
+	static auto r = Quad::BoundingBox(q);
 
 	int2 m = { Input::Mouse_x, Input::Mouse_y };
 
-	static bool state = false;
+	//if (Input::Mouse[LMB]) {
+	//	r.p2.x = m.x;
+	//	r.p2.y = m.y;
+	//}
 
-	auto switchWireframeMode = [&] {
-		if (state) return;
-
-		if (q.PointWithin(m)) {
-			fillShape = !fillShape;
-			state = true;
-		}
-	};
+	//if (Input::Mouse[RMB]) {
+	//	r.p4.x = m.x;
+	//	r.p4.y = m.y;
+	//}
 
 	if (Input::Mouse[LMB]) {
-		if (!state) switchWireframeMode();
+		if (q.PointWithin(m)) fillShape = true;
+		else fillShape = false;
 	}
-	else state = false;
 
-	//if (Input::Mouse[LMB]) switchWireframeMode();
 	Print(NumStr(Input::Mouse[LMB]) + "\n" + "");
 
-	if (!fillShape)	graphics.DrawQuad(q.p1, q.p2, q.p3, q.p4, Color::cyan);
-	else			graphics.FillQuad(q.p1, q.p2, q.p3, q.p4, Color::cyan);
-
-	auto r = Rectangle::BoundingBox(q);
-
 	graphics.DrawQuad(r.p1, r.p2, r.p3, r.p4, Color::cyan);
+
+	//if (!((Quad) r).CoversOther(q)) {
+		if (!fillShape)	graphics.DrawQuad(q.p1, q.p2, q.p3, q.p4, Color::cyan);
+		else			graphics.FillQuad(q.p1, q.p2, q.p3, q.p4, Color::cyan);
+	//}
 
 	// Render scene geometry
 	//RenderScene();
