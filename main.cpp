@@ -64,15 +64,39 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 LRESULT WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	switch (uMsg) {
+		case WM_LBUTTONDOWN:
+		case WM_RBUTTONDOWN:
+		case WM_MBUTTONDOWN:
+			Input::SetInputs(true, wParam, lParam);
+			break;
+
+		case WM_LBUTTONUP:
+			Input::SetInputs(false, MK_LBUTTON, lParam);
+			break;
+
+		case WM_RBUTTONUP:
+			Input::SetInputs(false, MK_RBUTTON, lParam);
+			break;
+
+		case WM_MBUTTONUP:
+			Input::SetInputs(false, MK_MBUTTON, lParam);
+			break;
+
 		case WM_MOUSEWHEEL:
 			Input::SetScroll(wParam, lParam);
 			break;
+
+		case WM_MOUSEMOVE:
+			Input::SetMousePos(lParam);
+			break;
+
 		case WM_KEYUP:
 			Input::SetInputs(false, wParam);
 			break;
 		case WM_KEYDOWN:
 			Input::SetInputs(true, wParam);
 			break;
+
 		case WM_DESTROY:
 			PostQuitMessage(0);
 			break;

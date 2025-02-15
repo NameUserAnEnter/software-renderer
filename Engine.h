@@ -10,8 +10,8 @@
 #include "ColorDefs.h"
 #include "Input.h"
 #include "Clock.h"
+#include "Polygon.h"
 #include "utils.h"
-#include <map>
 
 class Engine {
 public:

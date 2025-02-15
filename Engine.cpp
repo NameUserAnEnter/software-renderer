@@ -71,11 +71,47 @@ void Engine::Update() {
 	// Clear backbuffer
 	graphics.ClearBackBuffer();
 
+	static bool fillShape = false;
+	Quad q = {
+		{ viewport.viewportSize.x / 2 - 400, viewport.viewportSize.y / 2 - 200 },
+		{ viewport.viewportSize.x / 2 + 300, viewport.viewportSize.y / 2 - 100 },
+		{ viewport.viewportSize.x / 2 + 400, viewport.viewportSize.y / 2 + 200 },
+		{ viewport.viewportSize.x / 2 - 300, viewport.viewportSize.y / 2 + 100 },
+	};
+
+	int2 m = { Input::Mouse_x, Input::Mouse_y };
+
+	static bool state = false;
+
+	auto switchWireframeMode = [&] {
+		if (state) return;
+
+		if (q.PointWithin(m)) {
+			fillShape = !fillShape;
+			state = true;
+		}
+	};
+
+	if (Input::Mouse[LMB]) {
+		if (!state) switchWireframeMode();
+	}
+	else state = false;
+
+	//if (Input::Mouse[LMB]) switchWireframeMode();
+	Print(NumStr(Input::Mouse[LMB]) + "\n" + "");
+
+	if (!fillShape)	graphics.DrawQuad(q.p1, q.p2, q.p3, q.p4, Color::cyan);
+	else			graphics.FillQuad(q.p1, q.p2, q.p3, q.p4, Color::cyan);
+
+	auto r = Rectangle::BoundingBox(q);
+
+	graphics.DrawQuad(r.p1, r.p2, r.p3, r.p4, Color::cyan);
+
 	// Render scene geometry
-	RenderScene();
+	//RenderScene();
 
 	// Print info
-	UpdateOutput();
+	//UpdateOutput();
 
 	// Present the scene
 	graphics.UpdateFrontBuffer();
@@ -655,50 +691,33 @@ void Engine::DrawTriangleStrip(Vertex* vertices, unsigned int cVertices) {
 }
 
 void Engine::DrawQuadList(Vertex* vertices, unsigned int cVertices) {
-	// sort faces by z
-
-	std::vector<std::pair<int, float>> inds;
-
-	for (int i = 3; i < cVertices; i += 4) {
-		//float closest_to_the_camera = (vertices[i - 3].pos.z);		// at this moment z is inverted
-		//closest_to_the_camera = fmin(closest_to_the_camera, vertices[i - 2].pos.z);
-		//closest_to_the_camera = fmin(closest_to_the_camera, vertices[i - 1].pos.z);
-		//closest_to_the_camera = fmin(closest_to_the_camera, vertices[i].pos.z);
-
-		//inds.push_back({ i, closest_to_the_camera });
-
-		float furthest_from_the_camera = (vertices[i - 3].pos.z);
-		furthest_from_the_camera = fmax(furthest_from_the_camera, vertices[i - 2].pos.z);
-		furthest_from_the_camera = fmax(furthest_from_the_camera, vertices[i - 1].pos.z);
-		furthest_from_the_camera = fmax(furthest_from_the_camera, vertices[i].pos.z);
-
-		inds.push_back({ i, furthest_from_the_camera });
-	}
-
-	// sort ...
-	inds = Reverse(QuicksortMap(inds));
+	// polygon z-buffering? attempt
 
 	static bool popup = true;
 	std::string output;
 
-	// iterate over ind keys
-	//for (int index = 0; index < inds.size(); index++) {
-	//	const auto& e = inds[index];
+	float fz;
+	if (cVertices >= 3) fz = vertices[3].pos.z;		// initial value
 
-	//	int i = e.first;
-	//	float maxz = e.second;
+	for (int i = 3; i < cVertices; i += 4) {
+		const Vertex& v0 = vertices[i - 3];
+		const Vertex& v1 = vertices[i - 2];
+		const Vertex& v2 = vertices[i - 1];
+		const Vertex& v3 = vertices[i];
 
-	for (const auto& e : inds) {
-		const Vertex& v0 = vertices[e.first - 3];
-		const Vertex& v1 = vertices[e.first - 2];
-		const Vertex& v2 = vertices[e.first - 1];
-		const Vertex& v3 = vertices[e.first];
+		// face-z - furthest from the camera z from all face vertices
+		float maxz = fmax(v0.pos.z, v1.pos.z); maxz = fmax(maxz, v2.pos.z); maxz = fmax(maxz, v3.pos.z);
+
+		if (maxz > fz) {
+			continue;
+		}
+		fz = maxz;
 
 		if (popup) {
 			output.clear();
 
-			for (auto p : inds) output += NumStr(p.first, 2) + ": " + NumStr(p.second, 13) + "\n";
-			output += "\n" + NumStr(e.first, 2) + ": " + NumStr(e.second, 13);
+			output += "fz: " + NumStr(fz) + "\n";
+			output += "maxz: " + NumStr(maxz) + "\n";
 
 			graphics.ClearBackBuffer();
 		}
@@ -712,10 +731,11 @@ void Engine::DrawQuadList(Vertex* vertices, unsigned int cVertices) {
 		else			graphics.FillQuad(p0, p1, p2, p3, v0.color);
 
 		if (popup) {
-			Print(output);
+			//Print(output);
 			graphics.UpdateFrontBuffer();
 
-			Popup();
+			Popup(output);
+			//Popup();
 		}
 	}
 

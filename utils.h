@@ -4,6 +4,7 @@
 #include <windows.h>
 #include <string>
 #include <vector>
+#include "DimensionalTypes.h"
 
 inline std::wstring toWide(std::string str) {
 	std::wstring wide = L"";

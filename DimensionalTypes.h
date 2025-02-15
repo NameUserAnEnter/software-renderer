@@ -14,6 +14,14 @@ namespace DimensionalTypes {
 			if (*this == operand) return false;
 			else return true;
 		}
+
+		operator xy<int>() {
+			return xy<int> { (int) x, (int) y };
+		}
+
+		operator xy<float>() {
+			return xy<float> { (float) x, (float) y };
+		}
 	};
 
 	template<typename T> struct xyz {
