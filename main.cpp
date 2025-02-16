@@ -14,6 +14,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	wcex.cbSize = sizeof(WNDCLASSEX);
 	wcex.style = CS_VREDRAW | CS_HREDRAW;
+	wcex.hCursor = LoadCursor(NULL, IDI_APPLICATION);
 	wcex.lpfnWndProc = WndProc;
 
 	wcex.hInstance = hInstance;

@@ -80,9 +80,9 @@ void Engine::Update() {
 	};
 
 	static auto r = Quad::BoundingBox(q);
-	static const float offsetVal = 30;
-	static bool offset = true;
-	if (offset) {
+	static const float offsetVal = 0;
+	static bool bOffset = true;
+	if (bOffset) {
 		r.p1.x -= offsetVal;
 		r.p1.y -= offsetVal;
 		r.p2.x += offsetVal;
@@ -91,19 +91,25 @@ void Engine::Update() {
 		r.p3.y += offsetVal;
 		r.p4.x -= offsetVal;
 		r.p4.y += offsetVal;
-		offset = false;
+
+		//r.p2.y = q.p1.y;
+		bOffset = false;
 	}
 
 	int2 m = { Input::Mouse_x, Input::Mouse_y };
 
 	if (Input::Mouse[LMB]) {
-		r.p2.x = m.x;
-		r.p2.y = m.y;
-	}
+		float d1 = sqrt(pow(m.x - r.p1.x, 2) + pow(m.y - r.p1.y, 2));
+		float d2 = sqrt(pow(m.x - r.p2.x, 2) + pow(m.y - r.p2.y, 2));
+		float d3 = sqrt(pow(m.x - r.p3.x, 2) + pow(m.y - r.p3.y, 2));
+		float d4 = sqrt(pow(m.x - r.p4.x, 2) + pow(m.y - r.p4.y, 2));
 
-	if (Input::Mouse[RMB]) {
-		r.p4.x = m.x;
-		r.p4.y = m.y;
+		float dmin = fmin(d1, d2); dmin = fmin(dmin, d3); dmin = fmin(dmin, d4);
+
+		if (dmin == d1) r.p1 = m;
+		else if (dmin == d2) r.p2 = m;
+		else if (dmin == d3) r.p3 = m;
+		else if (dmin == d4) r.p4 = m;
 	}
 
 	//if (Input::Mouse[LMB]) {
@@ -124,6 +130,11 @@ void Engine::Update() {
 	graphics.Print(NumStr(r.p2.x) + ", " + NumStr(r.p2.y), r.p2.x, r.p2.y);
 	graphics.Print(NumStr(r.p3.x) + ", " + NumStr(r.p3.y), r.p3.x, r.p3.y);
 	graphics.Print(NumStr(r.p4.x) + ", " + NumStr(r.p4.y), r.p4.x, r.p4.y);
+
+	graphics.Print(NumStr(q.p1.x) + ", " + NumStr(q.p1.y), q.p1.x, q.p1.y);
+	graphics.Print(NumStr(q.p2.x) + ", " + NumStr(q.p2.y), q.p2.x, q.p2.y);
+	graphics.Print(NumStr(q.p3.x) + ", " + NumStr(q.p3.y), q.p3.x, q.p3.y);
+	graphics.Print(NumStr(q.p4.x) + ", " + NumStr(q.p4.y), q.p4.x, q.p4.y);
 
 	// Render scene geometry
 	//RenderScene();

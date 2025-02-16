@@ -8,7 +8,14 @@ public:
 	float2 p1, p2, p3, p4;
 
 	bool CoversOther(const Quad& other) {
-		if (PointWithin(other.p1) && PointWithin(other.p2) && PointWithin(other.p3) && PointWithin(other.p4)) return true;
+		if (
+			//PointWithin(other.p1) &&
+			//PointWithin(other.p2) &&
+			PointWithin(other.p3) //&&
+			//PointWithin(other.p4)
+			) {
+			return true;
+		}
 		return false;
 	}
 
@@ -42,7 +49,10 @@ public:
 			// if point.y is not inbetween a.y and b.y and neither equal to a.y or by, then the casted ray will not cross this side
 			if ((a.y < point.y && b.y < point.y) || (a.y > point.y && b.y > point.y)) continue;
 
-			// further calculations assume a.x >= b.x
+			// make sure crossing corners does not count as crossing two sides
+			if (b.y == point.y) continue;
+
+			// further calculations assume a.x >= b.x, so if it's not met swap a and b
 			if (a.x < b.x) {
 				float2 temp = a;
 				a = b;
