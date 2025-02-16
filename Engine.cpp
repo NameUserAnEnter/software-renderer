@@ -92,7 +92,8 @@ void Engine::Update() {
 		r.p4.x -= offsetVal;
 		r.p4.y += offsetVal;
 
-		//r.p2.y = q.p1.y;
+		//r.p2.x = 1062;
+		//r.p2.y = 260;
 		bOffset = false;
 	}
 

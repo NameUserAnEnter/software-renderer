@@ -9,10 +9,10 @@ public:
 
 	bool CoversOther(const Quad& other) {
 		if (
-			//PointWithin(other.p1) &&
-			//PointWithin(other.p2) &&
-			PointWithin(other.p3) //&&
-			//PointWithin(other.p4)
+			PointWithin(other.p1) &&
+			PointWithin(other.p2) &&
+			PointWithin(other.p3) &&
+			PointWithin(other.p4)
 			) {
 			return true;
 		}
@@ -48,27 +48,34 @@ public:
 
 			// if point.y is not inbetween a.y and b.y and neither equal to a.y or by, then the casted ray will not cross this side
 			if ((a.y < point.y && b.y < point.y) || (a.y > point.y && b.y > point.y)) continue;
+			
+			// at this moment point.y is in the range [a.y; b.y]
+
+			// assure no division by zero, geometrically this means point.y = a.y = b.y, so point is on the current side, so in the polygon
+			if ((a.y - b.y) == 0) {
+				return true;
+			}
 
 			// make sure crossing corners does not count as crossing two sides
 			if (b.y == point.y) continue;
 
-			// further calculations assume a.x >= b.x, so if it's not met swap a and b
+			// further calculations assume a.x >= b.x, so if this is not true swap a and b
 			if (a.x < b.x) {
 				float2 temp = a;
 				a = b;
 				b = temp;
 			}
 
-			// assure no division by zero, geometrically this means point.y = a.y = b.y
-			if ((a.y - b.y) == 0) {
-				return true;
-			}
-
+			// c is a point on the current side with y equal to point.y
 			float2 c;
 			c.y = point.y;
 			c.x = (c.y - b.y) * ((a.x - b.x) / (a.y - b.y)) + b.x;
 
-			if (point.x >= c.x) continue;
+			// point.x == c.x means point is on the current side, so in the polygon
+			if (point.x == c.x) return true;
+
+			// point.x > c.x means ray does not cross the current side
+			if (point.x > c.x) continue;
 
 			crossed_sides++;
 		}
