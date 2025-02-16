@@ -106,7 +106,7 @@ void Graphics::Print(std::string str, int x, int y, TEXT_ORIENTATION orientation
 }
 
 void Graphics::Print(std::wstring str, int x, int y, TEXT_ORIENTATION orientation) {
-	RECT rect = { x, y, uBufferWidth - x, uBufferHeight - y };
+	RECT rect = { x, y, uBufferWidth, uBufferHeight };
 
 	wchar_t* ptr = (wchar_t*) calloc(str.size() + 1, sizeof(wchar_t));
 	if (ptr == nullptr) return;

@@ -73,39 +73,57 @@ void Engine::Update() {
 
 	static bool fillShape = false;
 	Quad q = {
-		{ viewport.viewportSize.x / 2 - 300, viewport.viewportSize.y / 2 - 200 },
-		{ viewport.viewportSize.x / 2 + 400, viewport.viewportSize.y / 2 - 100 },
-		{ viewport.viewportSize.x / 2 + 300, viewport.viewportSize.y / 2 + 200 },
-		{ viewport.viewportSize.x / 2 - 400, viewport.viewportSize.y / 2 + 100 },
+		{ viewport.viewportSize.x / 2 - 400, viewport.viewportSize.y / 2 - 200 },
+		{ viewport.viewportSize.x / 2 + 300, viewport.viewportSize.y / 2 - 100 },
+		{ viewport.viewportSize.x / 2 + 400, viewport.viewportSize.y / 2 + 200 },
+		{ viewport.viewportSize.x / 2 - 300, viewport.viewportSize.y / 2 + 100 },
 	};
 
 	static auto r = Quad::BoundingBox(q);
+	static const float offsetVal = 30;
+	static bool offset = true;
+	if (offset) {
+		r.p1.x -= offsetVal;
+		r.p1.y -= offsetVal;
+		r.p2.x += offsetVal;
+		r.p2.y -= offsetVal;
+		r.p3.x += offsetVal;
+		r.p3.y += offsetVal;
+		r.p4.x -= offsetVal;
+		r.p4.y += offsetVal;
+		offset = false;
+	}
 
 	int2 m = { Input::Mouse_x, Input::Mouse_y };
 
-	//if (Input::Mouse[LMB]) {
-	//	r.p2.x = m.x;
-	//	r.p2.y = m.y;
-	//}
-
-	//if (Input::Mouse[RMB]) {
-	//	r.p4.x = m.x;
-	//	r.p4.y = m.y;
-	//}
-
 	if (Input::Mouse[LMB]) {
-		if (q.PointWithin(m)) fillShape = true;
-		else fillShape = false;
+		r.p2.x = m.x;
+		r.p2.y = m.y;
 	}
 
-	Print(NumStr(Input::Mouse[LMB]) + "\n" + "");
+	if (Input::Mouse[RMB]) {
+		r.p4.x = m.x;
+		r.p4.y = m.y;
+	}
+
+	//if (Input::Mouse[LMB]) {
+	//	if (q.PointWithin(m)) fillShape = true;
+	//	else fillShape = false;
+	//}
+
+	Print(NumStr(Input::Mouse[LMB]));
 
 	graphics.DrawQuad(r.p1, r.p2, r.p3, r.p4, Color::cyan);
 
-	//if (!((Quad) r).CoversOther(q)) {
+	if (!((Quad) r).CoversOther(q)) {
 		if (!fillShape)	graphics.DrawQuad(q.p1, q.p2, q.p3, q.p4, Color::cyan);
 		else			graphics.FillQuad(q.p1, q.p2, q.p3, q.p4, Color::cyan);
-	//}
+	}
+
+	graphics.Print(NumStr(r.p1.x) + ", " + NumStr(r.p1.y), r.p1.x, r.p1.y);
+	graphics.Print(NumStr(r.p2.x) + ", " + NumStr(r.p2.y), r.p2.x, r.p2.y);
+	graphics.Print(NumStr(r.p3.x) + ", " + NumStr(r.p3.y), r.p3.x, r.p3.y);
+	graphics.Print(NumStr(r.p4.x) + ", " + NumStr(r.p4.y), r.p4.x, r.p4.y);
 
 	// Render scene geometry
 	//RenderScene();
