@@ -72,45 +72,48 @@ void Engine::Update() {
 	graphics.ClearBackBuffer();
 
 	static bool fillShape = false;
-	Quad q = {
+	Polygon q = {{
 		{ viewport.viewportSize.x / 2 - 400, viewport.viewportSize.y / 2 - 200 },
 		{ viewport.viewportSize.x / 2 + 300, viewport.viewportSize.y / 2 - 100 },
 		{ viewport.viewportSize.x / 2 + 400, viewport.viewportSize.y / 2 + 200 },
 		{ viewport.viewportSize.x / 2 - 300, viewport.viewportSize.y / 2 + 100 },
-	};
+	}};
 
-	static auto r = Quad::BoundingBox(q);
+	static auto r = Polygon::BoundingBox(q);
 	static const float offsetVal = 0;
 	static bool bOffset = true;
 	if (bOffset) {
-		r.p1.x -= offsetVal;
-		r.p1.y -= offsetVal;
-		r.p2.x += offsetVal;
-		r.p2.y -= offsetVal;
-		r.p3.x += offsetVal;
-		r.p3.y += offsetVal;
-		r.p4.x -= offsetVal;
-		r.p4.y += offsetVal;
+		r[0].x -= offsetVal;
+		r[0].y -= offsetVal;
+		r[1].x += offsetVal;
+		r[1].y -= offsetVal;
+		r[2].x += offsetVal;
+		r[2].y += offsetVal;
+		r[3].x -= offsetVal;
+		r[3].y += offsetVal;
 
-		//r.p2.x = 1062;
-		//r.p2.y = 260;
+		//r[1].x = 1062;
+		//r[1].y = 260;
+
+		r[0].x = 180;
+		r[0].y = 320;
 		bOffset = false;
 	}
 
 	int2 m = { Input::Mouse_x, Input::Mouse_y };
 
 	if (Input::Mouse[LMB]) {
-		float d1 = sqrt(pow(m.x - r.p1.x, 2) + pow(m.y - r.p1.y, 2));
-		float d2 = sqrt(pow(m.x - r.p2.x, 2) + pow(m.y - r.p2.y, 2));
-		float d3 = sqrt(pow(m.x - r.p3.x, 2) + pow(m.y - r.p3.y, 2));
-		float d4 = sqrt(pow(m.x - r.p4.x, 2) + pow(m.y - r.p4.y, 2));
+		float d1 = sqrt(pow(m.x - r[0].x, 2) + pow(m.y - r[0].y, 2));
+		float d2 = sqrt(pow(m.x - r[1].x, 2) + pow(m.y - r[1].y, 2));
+		float d3 = sqrt(pow(m.x - r[2].x, 2) + pow(m.y - r[2].y, 2));
+		float d4 = sqrt(pow(m.x - r[3].x, 2) + pow(m.y - r[3].y, 2));
 
 		float dmin = fmin(d1, d2); dmin = fmin(dmin, d3); dmin = fmin(dmin, d4);
 
-		if (dmin == d1) r.p1 = m;
-		else if (dmin == d2) r.p2 = m;
-		else if (dmin == d3) r.p3 = m;
-		else if (dmin == d4) r.p4 = m;
+		if (dmin == d1)			r[0] = m;
+		else if (dmin == d2)	r[1] = m;
+		else if (dmin == d3)	r[2] = m;
+		else if (dmin == d4)	r[3] = m;
 	}
 
 	//if (Input::Mouse[LMB]) {
@@ -120,22 +123,22 @@ void Engine::Update() {
 
 	Print(NumStr(Input::Mouse[LMB]));
 
-	graphics.DrawQuad(r.p1, r.p2, r.p3, r.p4, Color::cyan);
+	graphics.DrawQuad(r[0], r[1], r[2], r[3], Color::cyan);
 
-	if (!((Quad) r).CoversOther(q)) {
-		if (!fillShape)	graphics.DrawQuad(q.p1, q.p2, q.p3, q.p4, Color::cyan);
-		else			graphics.FillQuad(q.p1, q.p2, q.p3, q.p4, Color::cyan);
+	if (!r.CoversOther(q)) {
+		if (!fillShape)	graphics.DrawQuad(q[0], q[1], q[2], q[3], Color::cyan);
+		else			graphics.FillQuad(q[0], q[1], q[2], q[3], Color::cyan);
 	}
 
-	graphics.Print(NumStr(r.p1.x) + ", " + NumStr(r.p1.y), r.p1.x, r.p1.y);
-	graphics.Print(NumStr(r.p2.x) + ", " + NumStr(r.p2.y), r.p2.x, r.p2.y);
-	graphics.Print(NumStr(r.p3.x) + ", " + NumStr(r.p3.y), r.p3.x, r.p3.y);
-	graphics.Print(NumStr(r.p4.x) + ", " + NumStr(r.p4.y), r.p4.x, r.p4.y);
+	graphics.Print(NumStr(r[0].x) + ", " + NumStr(r[0].y), r[0].x, r[0].y);
+	graphics.Print(NumStr(r[1].x) + ", " + NumStr(r[1].y), r[1].x, r[1].y);
+	graphics.Print(NumStr(r[2].x) + ", " + NumStr(r[2].y), r[2].x, r[2].y);
+	graphics.Print(NumStr(r[3].x) + ", " + NumStr(r[3].y), r[3].x, r[3].y);
 
-	graphics.Print(NumStr(q.p1.x) + ", " + NumStr(q.p1.y), q.p1.x, q.p1.y);
-	graphics.Print(NumStr(q.p2.x) + ", " + NumStr(q.p2.y), q.p2.x, q.p2.y);
-	graphics.Print(NumStr(q.p3.x) + ", " + NumStr(q.p3.y), q.p3.x, q.p3.y);
-	graphics.Print(NumStr(q.p4.x) + ", " + NumStr(q.p4.y), q.p4.x, q.p4.y);
+	graphics.Print(NumStr(q[0].x) + ", " + NumStr(q[0].y), q[0].x, q[0].y);
+	graphics.Print(NumStr(q[1].x) + ", " + NumStr(q[1].y), q[1].x, q[1].y);
+	graphics.Print(NumStr(q[2].x) + ", " + NumStr(q[2].y), q[2].x, q[2].y);
+	graphics.Print(NumStr(q[3].x) + ", " + NumStr(q[3].y), q[3].x, q[3].y);
 
 	// Render scene geometry
 	//RenderScene();

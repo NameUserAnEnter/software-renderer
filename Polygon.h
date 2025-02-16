@@ -3,43 +3,40 @@
 
 #include "DimensionalTypes.h"
 
-struct Quad {
-public:
-	float2 p1, p2, p3, p4;
+struct Polygon {
+	std::vector<float2> vertices;
 
-	bool CoversOther(const Quad& other) {
-		if (
-			PointWithin(other.p1) &&
-			PointWithin(other.p2) &&
-			PointWithin(other.p3) &&
-			PointWithin(other.p4)
-			) {
-			return true;
+	float2& operator[](unsigned int index) {
+		if (index >= vertices.size()) vertices.resize(index + 1);
+
+		return vertices[index];
+	}
+
+	bool CoversOther(Polygon& other) {
+		for (int i = 0; i < other.vertices.size(); i++) {
+		//for (int i = 0; i < 1; i++) {
+			if (!PointWithin(other.vertices[i])) return false;
 		}
-		return false;
+
+		return true;
 	}
 
 	bool PointWithin(const float2& point) {
 		// ray-casting point-in-polygon algorithm
 
-		float2* sides[4][2];
+		std::vector<std::vector<float2>> sides;
 
-		sides[0][0] = &p1;
-		sides[0][1] = &p2;
+		for (int i = 1; i <= vertices.size(); i++) {
+			int i1 = i - 1;
+			int i2 = i % vertices.size();
 
-		sides[1][0] = &p2;
-		sides[1][1] = &p3;
-
-		sides[2][0] = &p3;
-		sides[2][1] = &p4;
-
-		sides[3][0] = &p4;
-		sides[3][1] = &p1;
+			sides.push_back({ vertices[i1], vertices[i2] });
+		}
 
 		unsigned int crossed_sides = 0;
-		for (int i = 0; i < 4; i++) {
-			float2 a = *sides[i][0];
-			float2 b = *sides[i][1];
+		for (int i = 0; i < sides.size(); i++) {
+			float2 a = sides[i][0];
+			float2 b = sides[i][1];
 
 			// casting the ray from point requested to the right
 
@@ -80,26 +77,42 @@ public:
 			crossed_sides++;
 		}
 
-		// ray casting point-in-polygon algorithm rule; if the number of sides (e.g. 0, 2) crossed by the ray is even then the point is outside of the polygon
+		// method testing
+		//Popup(crossed_sides);
+
+		// ray casting point-in-polygon algorithm rule; if the number of sides crossed by the ray is even (e.g. 0, 2) then the point is outside of the polygon
 		if (crossed_sides % 2 == 0) return false;
 		return true;
 	}
 
-	static Quad BoundingBox(const Quad& q) {
-		auto xmax = fmax(q.p1.x, q.p2.x); xmax = fmax(xmax, q.p3.x); xmax = fmax(xmax, q.p4.x);
-		auto ymax = fmax(q.p1.y, q.p2.y); ymax = fmax(ymax, q.p3.y); ymax = fmax(ymax, q.p4.y);
+	static Polygon BoundingBox(Polygon& other) {
+		float ymin, xmin;
+		float xmax, ymax;
 
-		auto xmin = fmin(q.p1.x, q.p2.x); xmin = fmin(xmin, q.p3.x); xmin = fmin(xmin, q.p4.x);
-		auto ymin = fmin(q.p1.y, q.p2.y); ymin = fmin(ymin, q.p3.y); ymin = fmin(ymin, q.p4.y);
+		for (int i = 0; i < other.vertices.size(); i++) {
+			if (i == 0) {
+				xmin = other.vertices[i].x;
+				xmax = other.vertices[i].x;
 
-		Quad b = {
+				ymin = other.vertices[i].y;
+				ymax = other.vertices[i].y;
+
+				continue;
+			}
+
+			if (other.vertices[i].x < xmin) xmin = other.vertices[i].x;
+			if (other.vertices[i].x > xmax) xmax = other.vertices[i].x;
+
+			if (other.vertices[i].y < ymin) ymin = other.vertices[i].y;
+			if (other.vertices[i].y > ymax) ymax = other.vertices[i].y;
+		}
+
+		return {{
 			{ xmin, ymin },
 			{ xmax, ymin },
 			{ xmax, ymax },
-			{ xmin, ymax }
-		};
-
-		return b;
+			{ xmin, ymax },
+		}};
 	}
 };
 
