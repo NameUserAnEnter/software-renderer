@@ -72,73 +72,19 @@ void Engine::Update() {
 	graphics.ClearBackBuffer();
 
 	static bool fillShape = false;
-	Polygon q = {{
-		{ viewport.viewportSize.x / 2 - 400, viewport.viewportSize.y / 2 - 200 },
-		{ viewport.viewportSize.x / 2 + 300, viewport.viewportSize.y / 2 - 100 },
-		{ viewport.viewportSize.x / 2 + 400, viewport.viewportSize.y / 2 + 200 },
-		{ viewport.viewportSize.x / 2 - 300, viewport.viewportSize.y / 2 + 100 },
-	}};
-
-	static auto r = Polygon::BoundingBox(q);
-	static const float offsetVal = 0;
-	static bool bOffset = true;
-	if (bOffset) {
-		r[0].x -= offsetVal;
-		r[0].y -= offsetVal;
-		r[1].x += offsetVal;
-		r[1].y -= offsetVal;
-		r[2].x += offsetVal;
-		r[2].y += offsetVal;
-		r[3].x -= offsetVal;
-		r[3].y += offsetVal;
-
-		//r[1].x = 1062;
-		//r[1].y = 260;
-
-		r[0].x = 180;
-		r[0].y = 320;
-		bOffset = false;
-	}
 
 	int2 m = { Input::Mouse_x, Input::Mouse_y };
 
 	if (Input::Mouse[LMB]) {
-		float d1 = sqrt(pow(m.x - r[0].x, 2) + pow(m.y - r[0].y, 2));
-		float d2 = sqrt(pow(m.x - r[1].x, 2) + pow(m.y - r[1].y, 2));
-		float d3 = sqrt(pow(m.x - r[2].x, 2) + pow(m.y - r[2].y, 2));
-		float d4 = sqrt(pow(m.x - r[3].x, 2) + pow(m.y - r[3].y, 2));
-
-		float dmin = fmin(d1, d2); dmin = fmin(dmin, d3); dmin = fmin(dmin, d4);
-
-		if (dmin == d1)			r[0] = m;
-		else if (dmin == d2)	r[1] = m;
-		else if (dmin == d3)	r[2] = m;
-		else if (dmin == d4)	r[3] = m;
 	}
 
-	//if (Input::Mouse[LMB]) {
-	//	if (q.PointWithin(m)) fillShape = true;
-	//	else fillShape = false;
-	//}
+	Polygon p;
+	p[0] = { 400, 300 };
+	p[1] = { 600, 300 };
+	p[2] = { 600, 600 };
+	p[3] = { 400, 600 };
 
-	Print(NumStr(Input::Mouse[LMB]));
-
-	graphics.DrawQuad(r[0], r[1], r[2], r[3], Color::cyan);
-
-	if (!r.CoversOther(q)) {
-		if (!fillShape)	graphics.DrawQuad(q[0], q[1], q[2], q[3], Color::cyan);
-		else			graphics.FillQuad(q[0], q[1], q[2], q[3], Color::cyan);
-	}
-
-	graphics.Print(NumStr(r[0].x) + ", " + NumStr(r[0].y), r[0].x, r[0].y);
-	graphics.Print(NumStr(r[1].x) + ", " + NumStr(r[1].y), r[1].x, r[1].y);
-	graphics.Print(NumStr(r[2].x) + ", " + NumStr(r[2].y), r[2].x, r[2].y);
-	graphics.Print(NumStr(r[3].x) + ", " + NumStr(r[3].y), r[3].x, r[3].y);
-
-	graphics.Print(NumStr(q[0].x) + ", " + NumStr(q[0].y), q[0].x, q[0].y);
-	graphics.Print(NumStr(q[1].x) + ", " + NumStr(q[1].y), q[1].x, q[1].y);
-	graphics.Print(NumStr(q[2].x) + ", " + NumStr(q[2].y), q[2].x, q[2].y);
-	graphics.Print(NumStr(q[3].x) + ", " + NumStr(q[3].y), q[3].x, q[3].y);
+	graphics.DrawQuad(p[0], p[1], p[2], p[3], Color::white);
 
 	// Render scene geometry
 	//RenderScene();

@@ -28,8 +28,7 @@ void Input::SetInputs(bool state, unsigned long long input_code) {
 	if (input_code == VK_ESCAPE)		Esc = state;
 	else if (input_code == VK_RETURN)	Enter = state;
 	else if (input_code == VK_SPACE)	Space = state;
-	else if (input_code >= 0x30 && input_code <= 0x39)
-	{
+	else if (input_code >= 0x30 && input_code <= 0x39) {
 		if		(input_code == 0x30)	Numeric[0] = state;
 		else if (input_code == 0x31)	Numeric[1] = state;
 		else if (input_code == 0x32)	Numeric[2] = state;
@@ -41,8 +40,7 @@ void Input::SetInputs(bool state, unsigned long long input_code) {
 		else if (input_code == 0x38)	Numeric[8] = state;
 		else if (input_code == 0x39)	Numeric[9] = state;
 	}
-	else if (input_code >= 0x41 && input_code <= 0x5A)
-	{
+	else if (input_code >= 0x41 && input_code <= 0x5A) {
 		if		(input_code == 0x41)	Alpha[alphabet::A] = state;
 		else if (input_code == 0x42)	Alpha[alphabet::B] = state;
 		else if (input_code == 0x43)	Alpha[alphabet::C] = state;
@@ -104,8 +102,7 @@ void Input::SetScroll(unsigned long long data1, long long data2) {
 
 	if (delta > 0) Mouse[mouse_control::SCROLL_UP] = true;
 	if (delta < 0) Mouse[mouse_control::SCROLL_DOWN] = true;
-	if (delta == 0)
-	{
+	if (delta == 0) {
 		Mouse[mouse_control::SCROLL_UP] = false;
 		Mouse[mouse_control::SCROLL_DOWN] = false;
 	}

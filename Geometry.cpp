@@ -123,3 +123,7 @@ void Geometry::RotateAroundAxisZ(float3& vertex, float angle) {
 	vertex.y = sin(final_angle) * radius;
 }
 
+bool Geometry::LineSegmentsCross(float2 a1, float2 a2, float2 b1, float2 b2) {
+	if (fmax(a1.x, a2.x) < fmin(b1.x, b2.x) || (fmax(b1.x, b2.x) < fmin(a1.x, a2.x))) return false;
+}
+
